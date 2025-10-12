@@ -6,5 +6,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "beautifulsoup4>=4.14.2",
-    "selenium>=4.36.0",
+    "hcaptcha-challenger>=0.18.10",
+    "playwright>=1.55.0",
+    "requests>=2.32.5",
 ]
