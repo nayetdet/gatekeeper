@@ -201,3 +201,10 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Configuration
+config/*
+!config/.gitkeep
+
+# Temporary files
+tmp/*

@@ -86,3 +86,10 @@ venv/
 
 # VS Code
 .vscode/
+
+# Configuration
+config/*
+!config/.gitkeep
+
+# Temporary files
+tmp/*
