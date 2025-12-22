@@ -1,20 +1,22 @@
 import asyncio
-from camoufox import AsyncCamoufox
-from playwright.async_api import Page
-from src.gatekeeper.agents.epic_games_agent import EpicGamesAgent
-from src.gatekeeper.config import Config
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.triggers.interval import IntervalTrigger
+from gatekeeper.schedulers.claim_scheduler import claim_games
 
 async def main() -> None:
-    async with AsyncCamoufox(
-        persistent_context=True,
-        user_data_dir=Config.Paths.CONFIG_PATH,
-        humanize=1,
-        headless=False
-    ) as browser:
-        page: Page = browser.pages[0] if browser.pages else await browser.new_page()
-        agent: EpicGamesAgent = EpicGamesAgent(page=page)
-        await agent.claim_game("https://store.epicgames.com/pt-BR/p/gravity-circuit-489baa")
-        input()
+    # scheduler: AsyncIOScheduler = AsyncIOScheduler()
+    # scheduler.add_job(
+    #     lambda: asyncio.create_task(claim_games()),
+    #     trigger=IntervalTrigger(days=1),
+    #     id="claim_epic_games",
+    #     replace_existing=True,
+    #     max_instances=1,
+    #     coalesce=True
+    # )
+    #
+    # scheduler.start()
+    # await asyncio.Event().wait()
+    await claim_games()
 
 if __name__ == "__main__":
     asyncio.run(main())

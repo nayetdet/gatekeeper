@@ -6,8 +6,12 @@ class Config(AgentConfig):
     class EpicGames:
         EMAIL: str = getenv("EPIC_GAMES_EMAIL")
         PASSWORD: str = getenv("EPIC_GAMES_PASSWORD")
+        LOCALE: str = getenv("EPIC_GAMES_LOCALE")
+        COUNTRY: str = getenv("EPIC_GAMES_COUNTRY")
 
     class Paths:
-        CONFIG_PATH: Path = Path("config")
+        ROOT: Path = Path(__file__).resolve().parents[2]
+        CONFIG: Path = ROOT / "config"
+        DATA: Path = ROOT / "data"
 
 config: Config = Config()

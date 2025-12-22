@@ -204,7 +204,9 @@ __marimo__/
 
 # Configuration
 config/*
-!config/.gitkeep
+
+# Data
+data/*
 
 # Temporary files
 tmp/*

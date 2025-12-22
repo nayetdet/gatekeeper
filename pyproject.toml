@@ -6,9 +6,15 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "aiohttp>=3.13.0",
+    "aiosqlite>=0.22.0",
+    "alembic>=1.17.2",
     "apscheduler>=3.11.0",
     "camoufox[geoip]>=0.4.11",
     "hcaptcha-challenger>=0.18.10",
     "playwright>=1.55.0",
     "python-dotenv>=1.1.1",
+    "sqlmodel>=0.0.27",
 ]
+
+[tool.uv]
+package = true
