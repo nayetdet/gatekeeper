@@ -1,8 +1,8 @@
 import asyncio
 from camoufox import AsyncCamoufox
 from playwright.async_api import Page
-from src.rataria_epic_games.agents.epic_games_agent import EpicGamesAgent
-from src.rataria_epic_games.config import Config
+from src.gatekeeper.agents.epic_games_agent import EpicGamesAgent
+from src.gatekeeper.config import Config
 
 async def main() -> None:
     async with AsyncCamoufox(

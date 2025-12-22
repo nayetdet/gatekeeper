@@ -3,7 +3,7 @@ from contextlib import suppress
 from typing import Dict, Any
 from hcaptcha_challenger import AgentV
 from playwright.async_api import Page, Locator, Response
-from src.rataria_epic_games.config import config
+from src.gatekeeper.config import config
 
 class EpicGamesAgent:
     AUTH_URL: str = "https://www.epicgames.com/account/personal?lang=pt-BR&productName=egs&sessionInvalidated=true"
