@@ -1,10 +1,10 @@
 import asyncio
-from asyncio import Event
 from contextlib import suppress
-from typing import Dict, Any
-from playwright.async_api import Page, Locator, Response
+from typing import List
+from playwright.async_api import Page, Locator, expect
 from yarl import URL
 from gatekeeper.config import config
+from gatekeeper.events.session_events import SessionEvents
 from gatekeeper.models.game import Game
 from gatekeeper.repositories.game_repository import GameRepository
 from gatekeeper.utils.captcha_utils import CaptchaUtils
@@ -15,7 +15,7 @@ class SessionService:
     def __init__(self, page: Page, locale: str) -> None:
         self.__page: Page = page
         self.__locale: str = locale
-        self.__login_success_event: Event = Event()
+        self.__events: SessionEvents = SessionEvents()
 
     def get_auth_url(self) -> URL:
         return self.BASE_AUTH_URL.with_query(
@@ -36,10 +36,7 @@ class SessionService:
         await GameRepository.create(Game(url=str(url)))
 
     async def login_if_needed(self, redirect_url: URL) -> None:
-        self.__login_success_event.clear()
-        self.__page.on(event="response", f=self.__on_response)
-
-        try:
+        async with self.__events.listen(self.__page):
             await self.__page.goto(str(redirect_url), wait_until="domcontentloaded")
             if await self.__page.locator("//egs-navigation").get_attribute("isloggedin") == "true":
                 return
@@ -57,15 +54,24 @@ class SessionService:
 
             await CaptchaUtils.wait_for_challenge(self.__page)
             with suppress(asyncio.TimeoutError):
-                await asyncio.wait_for(self.__login_success_event.wait(), timeout=15)
+                await asyncio.wait_for(self.__events.login_success.wait(), timeout=60)
+
+            await asyncio.wait_for(self.__handle_post_login(), timeout=60)
             await self.__page.goto(str(redirect_url), wait_until="domcontentloaded")
-        finally: self.__page.remove_listener("response", self.__on_response)
 
-    async def __on_response(self, response: Response) -> None:
-        if response.request.method != "POST" or "talon" in response.url:
-            return
+    async def __handle_post_login(self) -> None:
+        button_ids: List[str] = [
+            "#link-success",
+            "#login-reminder-prompt-setup-tfa-skip",
+            "#yes"
+        ]
 
-        with suppress(Exception):
-            result: Dict[str, Any] = await response.json()
-            if "/id/api/analytics" in response.url and result.get("accountId"):
-                self.__login_success_event.set()
+        await self.__page.goto(str(self.BASE_AUTH_URL), wait_until="networkidle")
+        while not self.__events.csrf_refresh.is_set() and button_ids:
+            await self.__page.wait_for_timeout(500)
+            for button_id in button_ids.copy():
+                with suppress(Exception):
+                    reminder_button: Locator = self.__page.locator(button_id)
+                    await expect(reminder_button).to_be_visible(timeout=1000)
+                    await reminder_button.click(timeout=1000)
+                    button_ids.remove(button_id)

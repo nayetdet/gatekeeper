@@ -1,4 +1,5 @@
 import asyncio
+import logging
 from typing import List
 from camoufox import AsyncCamoufox
 from playwright.async_api import Page
@@ -15,6 +16,11 @@ async def claim_games(max_retries: int = 3) -> None:
 
     async with AsyncCamoufox(persistent_context=True, user_data_dir=config.Paths.CONFIG, humanize=1, headless=False) as browser:
         page: Page = browser.pages[0] if browser.pages else await browser.new_page()
+        await page.set_viewport_size({
+            "width": 1366,
+            "height": 768
+        })
+
         session_service: SessionService = SessionService(page=page, locale=config.EpicGames.LOCALE)
 
         tmp_urls: List[URL] = urls.copy()
@@ -22,7 +28,8 @@ async def claim_games(max_retries: int = 3) -> None:
             url: URL = tmp_urls[0]
             for _ in range(max_retries):
                 try: await session_service.claim_game(url)
-                except Exception:
+                except Exception as e:
+                    logging.error(f"Error claiming game {url}: {e}")
                     continue
 
                 tmp_urls.pop(0)
