@@ -14,13 +14,8 @@ async def claim_games(max_retries: int = 3) -> None:
     if not urls:
         return
 
-    async with AsyncCamoufox(persistent_context=True, user_data_dir=config.Paths.CONFIG, humanize=1, headless=False) as browser:
+    async with AsyncCamoufox(persistent_context=True, user_data_dir=config.Paths.CONFIG, humanize=1, headless=True) as browser:
         page: Page = browser.pages[0] if browser.pages else await browser.new_page()
-        await page.set_viewport_size({
-            "width": 1366,
-            "height": 768
-        })
-
         session_service: SessionService = SessionService(page=page, locale=config.EpicGames.LOCALE)
 
         tmp_urls: List[URL] = urls.copy()

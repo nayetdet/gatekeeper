@@ -1,13 +1,13 @@
 import asyncio
 from contextlib import suppress
 from typing import List
+from hcaptcha_challenger import AgentV
 from playwright.async_api import Page, Locator, expect
 from yarl import URL
 from gatekeeper.config import config
 from gatekeeper.events.session_events import SessionEvents
 from gatekeeper.models.game import Game
 from gatekeeper.repositories.game_repository import GameRepository
-from gatekeeper.utils.captcha_utils import CaptchaUtils
 
 class SessionService:
     BASE_AUTH_URL: URL = URL("https://www.epicgames.com/account/personal")
@@ -15,6 +15,7 @@ class SessionService:
     def __init__(self, page: Page, locale: str) -> None:
         self.__page: Page = page
         self.__locale: str = locale
+        self.__agent: AgentV = AgentV(page=self.__page, agent_config=config)
         self.__events: SessionEvents = SessionEvents()
 
     def get_auth_url(self) -> URL:
@@ -32,7 +33,7 @@ class SessionService:
         if not await purchase_button.get_attribute("disabled"):
             await purchase_button.click()
             await self.__page.frame_locator("//iframe[@class='']").locator("//button[contains(@class, 'payment-btn')]").click()
-            await CaptchaUtils.wait_for_challenge(self.__page)
+            await self.__agent.wait_for_challenge()
         await GameRepository.create(Game(url=str(url)))
 
     async def login_if_needed(self, redirect_url: URL) -> None:
@@ -52,7 +53,7 @@ class SessionService:
             await password_input.type(config.EpicGames.PASSWORD)
             await self.__page.click("#sign-in")
 
-            await CaptchaUtils.wait_for_challenge(self.__page)
+            await self.__agent.wait_for_challenge()
             with suppress(asyncio.TimeoutError):
                 await asyncio.wait_for(self.__events.login_success.wait(), timeout=60)
 

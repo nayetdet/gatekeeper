@@ -4,7 +4,7 @@ from typing import Dict, Any, AsyncGenerator, Self
 from playwright.async_api import Page, Response
 
 class SessionEvents:
-    def __init__(self):
+    def __init__(self) -> None:
         self.__login_success: Event = Event()
         self.__csrf_refresh: Event = Event()
 
