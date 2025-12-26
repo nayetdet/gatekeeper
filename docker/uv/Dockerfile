@@ -2,14 +2,9 @@
 FROM ghcr.io/astral-sh/uv:python3.13-trixie-slim AS builder
 ENV UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy \
-    UV_PYTHON_DOWNLOADS=0 \
-    DEBIAN_FRONTEND=noninteractive
+    UV_PYTHON_DOWNLOADS=0
 
 WORKDIR /app
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends build-essential \
-    && rm -rf /var/lib/apt/lists/*
-
 RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=uv.lock,target=uv.lock \
     --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
@@ -21,7 +16,13 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 # Runtime Stage
 FROM python:3.13-slim-trixie
-ENV PATH="/app/.venv/bin:$PATH"
+ENV PATH="/app/.venv/bin:$PATH" \
+    DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libgl1 \
+    libglib2.0-0 \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 RUN useradd -m app
