@@ -1,5 +1,6 @@
 import asyncio
 from contextlib import suppress
+from loguru import logger
 from typing import List
 from hcaptcha_challenger import AgentV
 from playwright.async_api import Page, Locator, expect
@@ -28,20 +29,26 @@ class SessionService:
         )
 
     async def claim_game(self, url: URL) -> None:
+        logger.info("Starting claim flow for game: {}", url)
         await self.login_if_needed(url)
         purchase_button: Locator = self.__page.locator("[data-testid='purchase-cta-button']")
         if not await purchase_button.get_attribute("disabled"):
             await purchase_button.click()
             await self.__page.frame_locator("//iframe[@class='']").locator("//button[contains(@class, 'payment-btn')]").click()
             await self.__agent.wait_for_challenge()
+        else: logger.info("Game already owned or unavailable: {}", url)
+        logger.info("Persisting claimed game to database: {}", url)
         await GameRepository.create(Game(url=str(url)))
 
     async def login_if_needed(self, redirect_url: URL) -> None:
+        logger.info("Ensuring authenticated session (redirect={})", redirect_url)
         async with self.__events.listen(self.__page):
             await self.__page.goto(str(redirect_url), wait_until="domcontentloaded")
             if await self.__page.locator("//egs-navigation").get_attribute("isloggedin") == "true":
+                logger.info("Already logged in, skipping login flow")
                 return
 
+            logger.info("Not authenticated, starting login flow")
             await self.__page.goto(str(self.get_auth_url()), wait_until="domcontentloaded")
             email_input: Locator = self.__page.locator("#email")
             await email_input.clear()
@@ -54,10 +61,12 @@ class SessionService:
             await self.__page.click("#sign-in")
 
             await self.__agent.wait_for_challenge()
-            with suppress(asyncio.TimeoutError):
-                await asyncio.wait_for(self.__events.login_success.wait(), timeout=60)
+            await asyncio.wait_for(self.__events.login_success.wait(), timeout=60)
+            logger.info("Login successful")
 
             await asyncio.wait_for(self.__handle_post_login(), timeout=60)
+            logger.info("Post login successful")
+            logger.info("Redirecting back to target page")
             await self.__page.goto(str(redirect_url), wait_until="domcontentloaded")
 
     async def __handle_post_login(self) -> None:

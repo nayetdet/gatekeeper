@@ -4,11 +4,10 @@ from apscheduler.triggers.interval import IntervalTrigger
 from gatekeeper.schedulers.claim_scheduler import claim_games
 
 async def main() -> None:
-    scheduler: AsyncIOScheduler = AsyncIOScheduler()
-    _ = asyncio.create_task(claim_games())
-
+    await claim_games()
+    scheduler = AsyncIOScheduler(timezone="UTC")
     scheduler.add_job(
-        lambda: asyncio.create_task(claim_games()),
+        claim_games,
         trigger=IntervalTrigger(days=1),
         id="claim_games",
         replace_existing=True,
@@ -17,7 +16,9 @@ async def main() -> None:
     )
 
     scheduler.start()
-    await asyncio.Event().wait()
+    try: await asyncio.Event().wait()
+    finally:
+        scheduler.shutdown(wait=False)
 
 if __name__ == "__main__":
     asyncio.run(main())

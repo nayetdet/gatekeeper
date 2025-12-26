@@ -1,4 +1,5 @@
 import aiohttp
+from loguru import logger
 from typing import List, Dict, Any, Optional
 from yarl import URL
 from gatekeeper.models.game import Game
@@ -27,9 +28,11 @@ class DiscoveryService:
         return self.BASE_STORE_URL / self.__locale / "p" / slug
 
     async def get_free_games(self) -> List[URL]:
+        logger.info("Fetching free games from Epic Games promotions API")
         urls: List[URL] = []
         async with aiohttp.ClientSession() as session:
             async with session.get(self.get_promotions_url()) as response:
+                logger.info("Promotions API response status: {}", response.status)
                 response.raise_for_status()
                 data: Dict[str, Any] = await response.json()
 
@@ -42,6 +45,8 @@ class DiscoveryService:
             discount_price: float = float(element.get("price", {}).get("totalPrice", {}).get("discountPrice", -1))
             if discount_price == 0:
                 urls.append(self.get_game_url(slug))
+
+        logger.info("Total free games found: {}", len(urls))
         return urls
 
     async def get_unclaimed_free_games(self) -> List[URL]:
@@ -49,5 +54,9 @@ class DiscoveryService:
         for url in await self.get_free_games():
             game: Optional[Game] = await GameRepository.get_by_url(str(url))
             if not game:
+                logger.info("Unclaimed free game found: {}", url)
                 unclaimed_urls.append(url)
+            else: logger.info("Already claimed free game found: {}", url)
+
+        logger.info("Total free unclaimed games found: {}", len(unclaimed_urls))
         return unclaimed_urls

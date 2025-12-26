@@ -1,31 +1,36 @@
 import asyncio
-import logging
 from typing import List
 from camoufox import AsyncCamoufox
+from loguru import logger
 from playwright.async_api import Page
 from yarl import URL
 from gatekeeper.config import config
 from gatekeeper.services.session_service import SessionService
 from gatekeeper.services.discovery_service import DiscoveryService
 
-async def claim_games(max_retries: int = 3) -> None:
+async def claim_games(max_retries: int = 5) -> None:
     discovery_service: DiscoveryService = DiscoveryService(locale=config.EpicGames.LOCALE, country=config.EpicGames.COUNTRY)
     urls: List[URL] = await discovery_service.get_unclaimed_free_games()
     if not urls:
+        logger.info("No unclaimed free games found, scheduler will retry later")
         return
 
     async with AsyncCamoufox(persistent_context=True, user_data_dir=config.Paths.CONFIG, humanize=1, headless=True) as browser:
         page: Page = browser.pages[0] if browser.pages else await browser.new_page()
         session_service: SessionService = SessionService(page=page, locale=config.EpicGames.LOCALE)
 
-        tmp_urls: List[URL] = urls.copy()
-        while tmp_urls:
-            url: URL = tmp_urls[0]
-            for _ in range(max_retries):
-                try: await session_service.claim_game(url)
+        for url in urls:
+            logger.info("Starting claim attempts for {}", url)
+            for attempt in range(1, max_retries + 1):
+                try:
+                    logger.info("Attempt {}/{} for {}", attempt, max_retries, url)
+                    await session_service.claim_game(url)
+                    logger.info("Successfully claimed {}", url)
+                    logger.debug("Sleeping 30s before next game")
+                    await asyncio.sleep(30)
+                    break
                 except Exception as e:
-                    logging.error(f"Error claiming game {url}: {e}")
-                    continue
+                    logger.exception("Error claiming game {} (attempt {}/{} | error={})", url, attempt, max_retries, e)
+            else: logger.error("Failed to claim {} after {} attempts", url, max_retries)
 
-                tmp_urls.pop(0)
-                await asyncio.sleep(30)
+    logger.info("Scheduler cycle finished")

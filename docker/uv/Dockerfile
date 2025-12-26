@@ -19,19 +19,17 @@ FROM python:3.13-slim-trixie
 ENV PATH="/app/.venv/bin:$PATH" \
     DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
+RUN apt-get update  \
+    && apt-get install -y --no-install-recommends \
         libgl1 \
         libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-RUN useradd -m app
-COPY --from=builder --chown=app:app /app /app
-COPY --chown=app:app docker/uv/scripts/entrypoint.sh /app/entrypoint.sh
+COPY --from=builder /app /app
+COPY docker/uv/scripts/entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 
-USER app
 VOLUME ["/app/config", "/app/data", "/app/tmp"]
 ENTRYPOINT ["/app/entrypoint.sh"]
 CMD ["python", "-m", "src.gatekeeper.main"]
