@@ -4,6 +4,12 @@ services:
       context: .
       dockerfile: ./docker/uv/Dockerfile
     container_name: gatekeeper
+    environment:
+      EPIC_GAMES_EMAIL: ${EPIC_GAMES_EMAIL}
+      EPIC_GAMES_PASSWORD: ${EPIC_GAMES_PASSWORD}
+      EPIC_GAMES_LOCALE: ${EPIC_GAMES_LOCALE}
+      EPIC_GAMES_COUNTRY: ${EPIC_GAMES_COUNTRY}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
     volumes:
       - gatekeeper_config:/app/config
       - gatekeeper_data:/app/data
