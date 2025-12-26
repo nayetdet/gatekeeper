@@ -6,14 +6,14 @@ from gatekeeper.database import engine
 from gatekeeper.models.game import Game
 
 class GameRepository:
-    @classmethod
-    async def get_by_url(cls, url: str) -> Optional[Game]:
+    @staticmethod
+    async def get_by_url(url: str) -> Optional[Game]:
         async with AsyncSession(engine) as session:
             result = await session.exec(select(Game).where(Game.url == url))
             return result.first()
 
-    @classmethod
-    async def create(cls, game: Game) -> Optional[Game]:
+    @staticmethod
+    async def create(game: Game) -> Optional[Game]:
         async with AsyncSession(engine) as session:
             try:
                 session.add(game)

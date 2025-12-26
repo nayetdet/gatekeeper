@@ -1,28 +1,35 @@
 import asyncio
 from contextlib import suppress
 from loguru import logger
-from typing import List
-from hcaptcha_challenger import AgentV
+from typing import List, Self
 from playwright.async_api import Page, Locator, expect
 from yarl import URL
+from gatekeeper.agents.captcha_agent import CaptchaAgent
 from gatekeeper.config import config
 from gatekeeper.events.session_events import SessionEvents
 from gatekeeper.models.game import Game
 from gatekeeper.repositories.game_repository import GameRepository
 
-class SessionService:
+class SessionAgent:
     BASE_AUTH_URL: URL = URL("https://www.epicgames.com/account/personal")
 
-    def __init__(self, page: Page, locale: str) -> None:
+    def __init__(self, page: Page) -> None:
         self.__page: Page = page
-        self.__locale: str = locale
-        self.__agent: AgentV = AgentV(page=self.__page, agent_config=config)
+        self.__captcha_agent: CaptchaAgent = CaptchaAgent(page)
         self.__events: SessionEvents = SessionEvents()
 
-    def get_auth_url(self) -> URL:
-        return self.BASE_AUTH_URL.with_query(
+    async def __aenter__(self) -> Self:
+        return self
+
+    async def __aexit__(self, *_) -> None:
+        self.close()
+
+    @classmethod
+    def get_auth_url(cls) -> URL:
+        lang: str = config.EpicGames.LOCALE
+        return cls.BASE_AUTH_URL.with_query(
             {
-                "lang": self.__locale,
+                "lang": lang,
                 "productName": "egs",
                 "sessionInvalidated": "true"
             }
@@ -35,7 +42,7 @@ class SessionService:
         if not await purchase_button.is_disabled():
             await purchase_button.click()
             await self.__page.frame_locator("//iframe[@class='']").locator("//button[contains(@class, 'payment-btn')]").click()
-            await self.__agent.wait_for_challenge()
+            await self.__captcha_agent.wait_for_challenge()
         else: logger.info("Game already owned or unavailable: {}", url)
         logger.info("Persisting claimed game to database: {}", url)
         await GameRepository.create(Game(url=str(url)))
@@ -60,7 +67,7 @@ class SessionService:
             await password_input.type(config.EpicGames.PASSWORD)
             await self.__page.click("#sign-in")
 
-            await self.__agent.wait_for_challenge()
+            await self.__captcha_agent.wait_for_challenge()
             with suppress(asyncio.TimeoutError):
                 await asyncio.wait_for(self.__events.login_success.wait(), timeout=60)
                 logger.info("Login successful")
@@ -88,3 +95,6 @@ class SessionService:
                     await expect(reminder_button).to_be_visible(timeout=1000)
                     await reminder_button.click(timeout=1000)
                     button_ids.remove(button_id)
+
+    def close(self) -> None:
+        self.__captcha_agent.close()

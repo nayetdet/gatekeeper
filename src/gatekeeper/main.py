@@ -2,14 +2,14 @@ import asyncio
 from datetime import datetime, timezone
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.interval import IntervalTrigger
-from gatekeeper.schedules.claim_games_task import claim_games_task
+from gatekeeper.jobs.claim_job import ClaimJob
 
 async def main() -> None:
     scheduler: AsyncIOScheduler = AsyncIOScheduler(timezone="UTC")
     scheduler.add_job(
-        claim_games_task,
+        ClaimJob.run,
         trigger=IntervalTrigger(hours=12),
-        id=claim_games_task.__name__.lower(),
+        id=ClaimJob.identifier(),
         replace_existing=True,
         max_instances=1,
         coalesce=True,

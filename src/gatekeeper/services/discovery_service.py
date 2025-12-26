@@ -2,6 +2,7 @@ import aiohttp
 from loguru import logger
 from typing import List, Dict, Any, Optional
 from yarl import URL
+from gatekeeper.config import config
 from gatekeeper.models.game import Game
 from gatekeeper.repositories.game_repository import GameRepository
 
@@ -9,29 +10,31 @@ class DiscoveryService:
     BASE_STORE_URL: URL = URL("https://store.epicgames.com")
     BASE_STORE_PROMOTIONS_URL: URL = URL("https://store-site-backend-static-ipv4.ak.epicgames.com/freeGamesPromotions")
 
-    def __init__(self, locale: str, country: str) -> None:
-        self.__locale: str = locale
-        self.__country: str = country
-
-    def get_promotions_url(self) -> URL:
-        return self.BASE_STORE_PROMOTIONS_URL.with_query(
+    @classmethod
+    def get_promotions_url(cls) -> URL:
+        locale: str = config.EpicGames.LOCALE
+        country: str = config.EpicGames.COUNTRY
+        return cls.BASE_STORE_PROMOTIONS_URL.with_query(
             {
-                "locale": self.__locale,
-                "country": self.__country,
+                "locale": locale,
+                "country": country,
                 "allowCountries": [
-                    self.__country
+                    country
                 ]
             }
         )
 
-    def get_game_url(self, slug: str) -> URL:
-        return self.BASE_STORE_URL / self.__locale / "p" / slug
+    @classmethod
+    def get_game_url(cls, slug: str) -> URL:
+        locale: str = config.EpicGames.LOCALE
+        return cls.BASE_STORE_URL / locale / "p" / slug
 
-    async def get_free_games(self) -> List[URL]:
+    @classmethod
+    async def get_free_games(cls) -> List[URL]:
         logger.info("Fetching free games from Epic Games promotions API")
         urls: List[URL] = []
         async with aiohttp.ClientSession() as session:
-            async with session.get(self.get_promotions_url()) as response:
+            async with session.get(cls.get_promotions_url()) as response:
                 logger.info("Promotions API response status: {}", response.status)
                 response.raise_for_status()
                 data: Dict[str, Any] = await response.json()
@@ -44,14 +47,15 @@ class DiscoveryService:
 
             discount_price: float = float(element.get("price", {}).get("totalPrice", {}).get("discountPrice", -1))
             if discount_price == 0:
-                urls.append(self.get_game_url(slug))
+                urls.append(cls.get_game_url(slug))
 
         logger.info("Total free games found: {}", len(urls))
         return urls
 
-    async def get_unclaimed_free_games(self) -> List[URL]:
+    @classmethod
+    async def get_unclaimed_free_games(cls) -> List[URL]:
         unclaimed_urls: List[URL] = []
-        for url in await self.get_free_games():
+        for url in await cls.get_free_games():
             game: Optional[Game] = await GameRepository.get_by_url(str(url))
             if not game:
                 logger.info("Unclaimed free game found: {}", url)

@@ -19,10 +19,10 @@ class SessionEvents:
     @asynccontextmanager
     async def listen(self, page: Page) -> AsyncGenerator[Self, None]:
         self.reset()
-        page.on("response", self.on_response)
+        page.on(event="response", f=self.on_response)
         try: yield self
         finally:
-            page.remove_listener("response", self.on_response)
+            page.remove_listener(event="response", f=self.on_response)
 
     async def on_response(self, response: Response) -> None:
         if response.request.method != "POST" or "talon" in response.url:
