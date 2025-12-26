@@ -202,11 +202,7 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
-# Configuration
+# Project configuration and runtime data
 config/*
-
-# Data
 data/*
-
-# Temporary files
 tmp/*
