@@ -2,6 +2,7 @@
 FROM ghcr.io/astral-sh/uv:python3.13-trixie-slim AS builder
 ENV UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy \
+    UV_NO_DEV=1 \
     UV_PYTHON_DOWNLOADS=0
 
 WORKDIR /app
@@ -21,15 +22,21 @@ ENV PATH="/app/.venv/bin:$PATH" \
 
 RUN apt-get update  \
     && apt-get install -y --no-install-recommends \
+        libasound2 \
         libgl1 \
         libglib2.0-0 \
+        libgtk-3-0 \
+        libx11-xcb1 \
+    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-COPY --from=builder /app /app
-COPY docker/uv/scripts/entrypoint.sh /app/entrypoint.sh
+RUN useradd -m app
+COPY --chown=app:app --from=builder /app /app
+COPY --chown=app:app docker/uv/scripts/entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 
+USER app
 VOLUME ["/app/config", "/app/data", "/app/tmp"]
 ENTRYPOINT ["/app/entrypoint.sh"]
 CMD ["python", "-m", "src.gatekeeper.main"]

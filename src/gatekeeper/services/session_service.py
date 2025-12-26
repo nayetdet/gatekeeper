@@ -32,7 +32,7 @@ class SessionService:
         logger.info("Starting claim flow for game: {}", url)
         await self.login_if_needed(url)
         purchase_button: Locator = self.__page.locator("[data-testid='purchase-cta-button']")
-        if not await purchase_button.get_attribute("disabled"):
+        if not await purchase_button.is_disabled():
             await purchase_button.click()
             await self.__page.frame_locator("//iframe[@class='']").locator("//button[contains(@class, 'payment-btn')]").click()
             await self.__agent.wait_for_challenge()
@@ -61,11 +61,14 @@ class SessionService:
             await self.__page.click("#sign-in")
 
             await self.__agent.wait_for_challenge()
-            await asyncio.wait_for(self.__events.login_success.wait(), timeout=60)
-            logger.info("Login successful")
+            with suppress(asyncio.TimeoutError):
+                await asyncio.wait_for(self.__events.login_success.wait(), timeout=60)
+                logger.info("Login successful")
 
-            await asyncio.wait_for(self.__handle_post_login(), timeout=60)
-            logger.info("Post login successful")
+            with suppress(asyncio.TimeoutError):
+                await asyncio.wait_for(self.__handle_post_login(), timeout=60)
+                logger.info("Post login successful")
+
             logger.info("Redirecting back to target page")
             await self.__page.goto(str(redirect_url), wait_until="domcontentloaded")
 
