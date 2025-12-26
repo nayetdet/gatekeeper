@@ -9,14 +9,16 @@ WORKDIR /app
 RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=uv.lock,target=uv.lock \
     --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-    uv sync --frozen --no-install-project --no-dev
+    uv sync --locked --no-install-project
 
 COPY . /app
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-dev
+    uv sync --locked
 
 # Runtime Stage
 FROM python:3.13-slim-trixie
+ARG UID=1000
+ARG GID=1000
 ENV PATH="/app/.venv/bin:$PATH" \
     DEBIAN_FRONTEND=noninteractive
 
@@ -30,13 +32,17 @@ RUN apt-get update  \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /app
-RUN useradd -m app
-COPY --chown=app:app --from=builder /app /app
-COPY --chown=app:app docker/uv/scripts/entrypoint.sh /app/entrypoint.sh
+RUN groupadd --system --gid ${GID} nonroot \
+    && useradd --system --uid ${UID} --gid ${GID} --create-home nonroot \
+    && mkdir -p /app/config /app/data /app/tmp \
+    && chown nonroot:nonroot -R /app
+
+COPY --from=builder --chown=nonroot:nonroot /app /app
+COPY --chown=nonroot:nonroot docker/uv/scripts/entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 
-USER app
+USER nonroot
+WORKDIR /app
 VOLUME ["/app/config", "/app/data", "/app/tmp"]
 ENTRYPOINT ["/app/entrypoint.sh"]
 CMD ["python", "-m", "src.gatekeeper.main"]
