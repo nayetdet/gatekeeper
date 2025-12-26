@@ -8,7 +8,7 @@ from gatekeeper.config import config
 from gatekeeper.services.session_service import SessionService
 from gatekeeper.services.discovery_service import DiscoveryService
 
-async def claim_games_task(max_retries: int = 5) -> None:
+async def claim_games_task(max_retries: int = 3) -> None:
     logger.info("Task cycle started")
     discovery_service: DiscoveryService = DiscoveryService(locale=config.EpicGames.LOCALE, country=config.EpicGames.COUNTRY)
     urls: List[URL] = await discovery_service.get_unclaimed_free_games()

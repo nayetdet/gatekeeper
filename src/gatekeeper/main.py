@@ -8,8 +8,8 @@ async def main() -> None:
     scheduler: AsyncIOScheduler = AsyncIOScheduler(timezone="UTC")
     scheduler.add_job(
         claim_games_task,
-        trigger=IntervalTrigger(days=1),
-        id=claim_games_task.__name__,
+        trigger=IntervalTrigger(hours=12),
+        id=claim_games_task.__name__.lower(),
         replace_existing=True,
         max_instances=1,
         coalesce=True,
