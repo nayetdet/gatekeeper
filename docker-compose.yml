@@ -1,0 +1,16 @@
+services:
+  gatekeeper:
+    build:
+      context: .
+      dockerfile: ./docker/uv/Dockerfile
+    container_name: gatekeeper
+    volumes:
+      - gatekeeper_config:/app/config
+      - gatekeeper_data:/app/data
+      - gatekeeper_tmp:/app/tmp
+    restart: unless-stopped
+
+volumes:
+  gatekeeper_config:
+  gatekeeper_data:
+  gatekeeper_tmp:
