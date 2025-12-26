@@ -495,7 +495,7 @@ requires-dist = [
     { name = "camoufox", extras = ["geoip"], specifier = ">=0.4.11" },
     { name = "hcaptcha-challenger", specifier = ">=0.18.10" },
     { name = "playwright", specifier = ">=1.55.0" },
-    { name = "python-dotenv", specifier = ">=1.1.1" },
+    { name = "python-dotenv", specifier = ">=1.2.1" },
     { name = "sqlmodel", specifier = ">=0.0.27" },
 ]
 

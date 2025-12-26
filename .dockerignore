@@ -26,5 +26,4 @@ dist/
 .DS_Store
 
 data/
-config/
 tmp/

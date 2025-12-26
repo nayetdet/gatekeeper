@@ -12,8 +12,8 @@ class DiscoveryService:
 
     @classmethod
     def get_promotions_url(cls) -> URL:
-        locale: str = config.EpicGames.LOCALE
-        country: str = config.EpicGames.COUNTRY
+        locale: str = config.EPIC_GAMES_LOCALE
+        country: str = config.EPIC_GAMES_COUNTRY
         return cls.BASE_STORE_PROMOTIONS_URL.with_query(
             {
                 "locale": locale,
@@ -26,7 +26,7 @@ class DiscoveryService:
 
     @classmethod
     def get_game_url(cls, slug: str) -> URL:
-        locale: str = config.EpicGames.LOCALE
+        locale: str = config.EPIC_GAMES_LOCALE
         return cls.BASE_STORE_URL / locale / "p" / slug
 
     @classmethod
@@ -35,7 +35,6 @@ class DiscoveryService:
         urls: List[URL] = []
         async with aiohttp.ClientSession() as session:
             async with session.get(cls.get_promotions_url()) as response:
-                logger.info("Promotions API response status: {}", response.status)
                 response.raise_for_status()
                 data: Dict[str, Any] = await response.json()
 

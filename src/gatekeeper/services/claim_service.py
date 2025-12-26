@@ -17,7 +17,7 @@ class ClaimService:
             logger.info("Claim finished: no unclaimed games found")
             return
 
-        async with AsyncCamoufox(persistent_context=True, user_data_dir=config.Paths.CONFIG, humanize=1, headless=False) as browser:
+        async with AsyncCamoufox(persistent_context=True, user_data_dir=config.BROWSER_PROFILE_PATH, humanize=0.2, headless=True) as browser:
             page: Page = browser.pages[0] if browser.pages else await browser.new_page()
             async with SessionAgent(page=page) as session_agent:
                 for index, url in enumerate(urls, start=1):
@@ -29,7 +29,7 @@ class ClaimService:
                             await asyncio.sleep(30)
                             break
                         except Exception as e:
-                            logger.exception("Error claiming game {} (attempt {}/{} | error={})", url, attempt, max_retries, e)
+                            logger.error("Error claiming game {} (attempt {}/{} | error={})", url, attempt, max_retries, e)
                     else: logger.error("Failed to claim {} after {} attempts", url, max_retries)
 
         logger.info("Claim finished")
