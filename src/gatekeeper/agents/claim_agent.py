@@ -23,7 +23,7 @@ class ClaimAgent:
 
     async def __handle_order_confirmation(self) -> None:
         iframe: FrameLocator = self.__page.frame_locator("//iframe[@class='']")
-        payment_container: Locator = iframe.locator("//div[contains(@class, 'payment-order-confirm')]")
+        payment_container: Locator = iframe.locator("//div[@class='payment-order-confirm']")
         with suppress(TimeoutError):
             await expect(payment_container).to_be_visible()
             await payment_container.focus()
