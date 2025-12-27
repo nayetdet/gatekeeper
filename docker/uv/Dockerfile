@@ -34,7 +34,7 @@ RUN apt-get update  \
 
 RUN groupadd --system --gid ${GID} nonroot \
     && useradd --system --uid ${UID} --gid ${GID} --create-home nonroot \
-    && mkdir -p /app/data /app/tmp \
+    && mkdir -p /app/data /app/tmp/.cache /app/tmp/.captcha /app/tmp/.challenge \
     && chown nonroot:nonroot -R /app
 
 COPY --from=builder --chown=nonroot:nonroot /app /app
