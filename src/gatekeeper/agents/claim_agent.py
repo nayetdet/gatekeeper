@@ -12,7 +12,6 @@ class ClaimAgent:
 
     async def claim_game(self, captcha_agent: CaptchaAgent, url: URL) -> None:
         logger.info("Starting claim flow for game: {}", url)
-        await self.__handle_license_agreement()
         purchase_button: Locator = self.__page.locator("[data-testid='purchase-cta-button']")
         if not await purchase_button.is_disabled():
             await purchase_button.click()
@@ -21,13 +20,6 @@ class ClaimAgent:
         else: logger.info("Game already owned or unavailable: {}", url)
         logger.info("Persisting claimed game to database: {}", url)
         await GameRepository.create(Game(url=str(url)))
-
-    async def __handle_license_agreement(self) -> None:
-        with suppress(TimeoutError):
-            await self.__page.click("//label[@for='agree']")
-            accept_button: Locator = self.__page.locator("//button//span[text()='Accept']")
-            await expect(accept_button).to_be_enabled()
-            await accept_button.click()
 
     async def __handle_order_confirmation(self) -> None:
         iframe: FrameLocator = self.__page.frame_locator("//iframe[@class='']")
