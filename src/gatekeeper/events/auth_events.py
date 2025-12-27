@@ -10,12 +10,12 @@ class SessionEvents:
         self.__csrf_refresh: Event = Event()
 
     async def __aenter__(self) -> Self:
-        self.__page.on(event="response", f=self.on_response)
+        self.__page.on(event="response", f=self.__on_response)
         return self
 
     async def __aexit__(self, *_) -> None:
         with suppress(Exception):
-            self.__page.remove_listener(event="response", f=self.on_response)
+            self.__page.remove_listener(event="response", f=self.__on_response)
 
     @property
     def login_success(self) -> Event:
@@ -25,7 +25,7 @@ class SessionEvents:
     def csrf_refresh(self) -> Event:
         return self.__csrf_refresh
 
-    async def on_response(self, response: Response) -> None:
+    async def __on_response(self, response: Response) -> None:
         if response.request.method != "POST" or "talon" in response.url:
             return
 

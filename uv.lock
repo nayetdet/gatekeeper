@@ -481,9 +481,11 @@ dependencies = [
     { name = "apscheduler" },
     { name = "camoufox", extra = ["geoip"] },
     { name = "hcaptcha-challenger" },
+    { name = "loguru" },
     { name = "playwright" },
     { name = "python-dotenv" },
     { name = "sqlmodel" },
+    { name = "tenacity" },
 ]
 
 [package.metadata]
@@ -493,10 +495,12 @@ requires-dist = [
     { name = "alembic", specifier = ">=1.17.2" },
     { name = "apscheduler", specifier = ">=3.11.0" },
     { name = "camoufox", extras = ["geoip"], specifier = ">=0.4.11" },
-    { name = "hcaptcha-challenger", specifier = ">=0.18.10" },
+    { name = "hcaptcha-challenger", specifier = ">=0.19.0" },
+    { name = "loguru", specifier = ">=0.7.3" },
     { name = "playwright", specifier = ">=1.55.0" },
     { name = "python-dotenv", specifier = ">=1.2.1" },
-    { name = "sqlmodel", specifier = ">=0.0.27" },
+    { name = "sqlmodel", specifier = ">=0.0.30" },
+    { name = "tenacity", specifier = ">=9.1.2" },
 ]
 
 [[package]]
@@ -1718,15 +1722,15 @@ wheels = [
 
 [[package]]
 name = "sqlmodel"
-version = "0.0.29"
+version = "0.0.30"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pydantic" },
     { name = "sqlalchemy" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/16/9c/5438f6c0f2bf3ea8760de230badc7df355e1b84cccda6d3cac696578ab0c/sqlmodel-0.0.29.tar.gz", hash = "sha256:cdebdeda7addb3d934c7a70812a23aa8bdff5550bfffa023db72dec1ba5e45d7", size = 119485, upload-time = "2025-12-23T20:59:46.807Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/4a/bc/162873c9b2466bb6bda1531b6023b5d8ecda4daffaaae54e6fec53e2c0a7/sqlmodel-0.0.30.tar.gz", hash = "sha256:076076976aac683bae3e10c791d9e2ec5fead57ab25f7e476dea36cdfe9505e1", size = 97581, upload-time = "2025-12-26T11:45:55.002Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c2/3f/f71798ed4cc6784122af8d404df187cfc683db795b3eee542e2df23f94a9/sqlmodel-0.0.29-py3-none-any.whl", hash = "sha256:56e4b3e9ab5825f6cbdd40bc46f90f01c0f73c73f44843a03d494c0845a948cd", size = 29355, upload-time = "2025-12-23T20:59:45.368Z" },
+    { url = "https://files.pythonhosted.org/packages/35/f3/247bad31f13066a8186f2d4d1a43c75a441ed9f889d629d69d9820116dfc/sqlmodel-0.0.30-py3-none-any.whl", hash = "sha256:1b7f992170ff3145d98a72d41271335c8bb51d579c7254a1626f82bde4ec64ed", size = 29362, upload-time = "2025-12-26T11:45:53.298Z" },
 ]
 
 [[package]]

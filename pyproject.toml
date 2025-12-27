@@ -10,10 +10,12 @@ dependencies = [
     "alembic>=1.17.2",
     "apscheduler>=3.11.0",
     "camoufox[geoip]>=0.4.11",
-    "hcaptcha-challenger>=0.18.10",
+    "hcaptcha-challenger>=0.19.0",
+    "loguru>=0.7.3",
     "playwright>=1.55.0",
     "python-dotenv>=1.2.1",
-    "sqlmodel>=0.0.27",
+    "sqlmodel>=0.0.30",
+    "tenacity>=9.1.2",
 ]
 
 [tool.uv]
