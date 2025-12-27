@@ -3,9 +3,6 @@ services:
     build:
       context: .
       dockerfile: ./docker/uv/Dockerfile
-      args:
-        UID: ${UID:-1000}
-        GID: ${GID:-1000}
     container_name: gatekeeper
     environment:
       EPIC_GAMES_EMAIL: ${EPIC_GAMES_EMAIL}

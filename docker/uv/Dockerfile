@@ -17,8 +17,6 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 # Runtime Stage
 FROM python:3.13-slim-trixie
-ARG UID=1000
-ARG GID=1000
 ENV PATH="/app/.venv/bin:$PATH" \
     DEBIAN_FRONTEND=noninteractive
 
@@ -32,17 +30,14 @@ RUN apt-get update  \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-RUN groupadd --system --gid ${GID} nonroot \
-    && useradd --system --uid ${UID} --gid ${GID} --create-home nonroot \
-    && mkdir -p /app/data \
-    && chown nonroot:nonroot -R /app
+COPY --from=builder /app /app
+RUN camoufox fetch
 
-COPY --from=builder --chown=nonroot:nonroot /app /app
-COPY --chown=nonroot:nonroot docker/uv/scripts/entrypoint.sh /app/entrypoint.sh
+COPY docker/uv/scripts/entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 
-USER nonroot
+USER root
 WORKDIR /app
-VOLUME ["/app/data"]
+VOLUME ["/app/data", "/app/tmp"]
 ENTRYPOINT ["/app/entrypoint.sh"]
 CMD ["python", "-m", "src.gatekeeper.main"]
