@@ -2,7 +2,7 @@ import asyncio
 from contextlib import suppress
 from loguru import logger
 from typing import List, Self
-from playwright.async_api import Page, Locator, expect
+from playwright.async_api import Page, Locator, expect, FrameLocator
 from yarl import URL
 from gatekeeper.agents.captcha_agent import CaptchaAgent
 from gatekeeper.config import config
@@ -42,7 +42,13 @@ class SessionAgent:
         purchase_button: Locator = self.__page.locator("[data-testid='purchase-cta-button']")
         if not await purchase_button.is_disabled():
             await purchase_button.click()
-            await self.__page.frame_locator("//iframe[@class='']").locator("//button[contains(@class, 'payment-btn')]").click()
+            wpc: FrameLocator = self.__page.frame_locator("//iframe[@class='']")
+            payment_button: Locator = wpc.locator("//button[contains(@class, 'payment-btn')]")
+            with suppress(Exception):
+                await expect(payment_button).to_be_attached()
+
+            await self.__page.wait_for_timeout(5000)
+            await payment_button.click(timeout=10000)
             await self.__captcha_agent.wait_for_challenge()
         else: logger.info("Game already owned or unavailable: {}", url)
         logger.info("Persisting claimed game to database: {}", url)
