@@ -8,7 +8,7 @@ async def main() -> None:
     scheduler: AsyncIOScheduler = AsyncIOScheduler(timezone="UTC")
     scheduler.add_job(
         ClaimJob.run,
-        trigger=IntervalTrigger(hours=12),
+        trigger=IntervalTrigger(hours=6),
         id=ClaimJob.identifier(),
         replace_existing=True,
         max_instances=1,
