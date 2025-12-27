@@ -38,8 +38,6 @@ RUN groupadd --system --gid ${GID} nonroot \
     && chown nonroot:nonroot -R /app
 
 COPY --from=builder --chown=nonroot:nonroot /app /app
-RUN camoufox fetch
-
 COPY --chown=nonroot:nonroot docker/uv/scripts/entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 
