@@ -1,7 +1,7 @@
 import asyncio
 from contextlib import suppress
 from loguru import logger
-from typing import List, Self
+from typing import Self, List
 from playwright.async_api import Page, Locator, expect, FrameLocator
 from yarl import URL
 from gatekeeper.agents.captcha_agent import CaptchaAgent
@@ -17,7 +17,6 @@ class SessionAgent:
     def __init__(self, page: Page) -> None:
         self.__page: Page = page
         self.__captcha_agent: CaptchaAgent = CaptchaAgent(page)
-        self.__events: SessionEvents = SessionEvents()
 
     async def __aenter__(self) -> Self:
         return self
@@ -56,7 +55,7 @@ class SessionAgent:
 
     async def login_if_needed(self, redirect_url: URL, max_retries: int) -> None:
         logger.info("Ensuring authenticated session (redirect={})", redirect_url)
-        async with self.__events.listen(self.__page):
+        async with SessionEvents(self.__page) as events:
             for attempt in range(1, max_retries + 1):
                 logger.info("Login attempt {}/{} started", attempt, max_retries)
                 await self.__page.goto(str(redirect_url), wait_until="domcontentloaded")
@@ -72,11 +71,11 @@ class SessionAgent:
                     await self.__captcha_agent.wait_for_challenge()
 
                     with suppress(asyncio.TimeoutError):
-                        await asyncio.wait_for(self.__events.login_success.wait(), timeout=60)
+                        await asyncio.wait_for(events.login_success.wait(), timeout=60)
                         logger.info("Login successful")
 
                     with suppress(asyncio.TimeoutError):
-                        await asyncio.wait_for(self.__handle_post_login(), timeout=60)
+                        await asyncio.wait_for(self.__handle_post_login(events), timeout=60)
                         logger.info("Post login successful")
 
                     logger.info("Redirecting back to target page")
@@ -88,7 +87,7 @@ class SessionAgent:
                     continue
             else: logger.error("Authentication failed after {} attempts", max_retries)
 
-    async def __handle_post_login(self) -> None:
+    async def __handle_post_login(self, events: SessionEvents) -> None:
         button_ids: List[str] = [
             "#link-success",
             "#login-reminder-prompt-setup-tfa-skip",
@@ -96,7 +95,7 @@ class SessionAgent:
         ]
 
         await self.__page.goto(str(self.BASE_AUTH_URL), wait_until="networkidle")
-        while not self.__events.csrf_refresh.is_set() and button_ids:
+        while not events.csrf_refresh.is_set() and button_ids:
             await self.__page.wait_for_timeout(500)
             for button_id in button_ids.copy():
                 with suppress(Exception):
