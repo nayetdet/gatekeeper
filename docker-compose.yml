@@ -15,9 +15,7 @@ services:
       GEMINI_API_KEY: ${GEMINI_API_KEY}
     volumes:
       - gatekeeper_data:/app/data
-      - gatekeeper_tmp:/app/tmp
     restart: unless-stopped
 
 volumes:
   gatekeeper_data:
-  gatekeeper_tmp:

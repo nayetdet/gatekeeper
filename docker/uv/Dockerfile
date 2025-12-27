@@ -34,7 +34,7 @@ RUN apt-get update  \
 
 RUN groupadd --system --gid ${GID} nonroot \
     && useradd --system --uid ${UID} --gid ${GID} --create-home nonroot \
-    && mkdir -p /app/data /app/tmp/.cache /app/tmp/.captcha /app/tmp/.challenge \
+    && mkdir -p /app/data \
     && chown nonroot:nonroot -R /app
 
 COPY --from=builder --chown=nonroot:nonroot /app /app
@@ -43,6 +43,6 @@ RUN chmod +x /app/entrypoint.sh
 
 USER nonroot
 WORKDIR /app
-VOLUME ["/app/data", "/app/tmp"]
+VOLUME ["/app/data"]
 ENTRYPOINT ["/app/entrypoint.sh"]
 CMD ["python", "-m", "src.gatekeeper.main"]
