@@ -8,7 +8,7 @@ from tenacity import retry, stop_after_attempt, wait_fixed, before_log, before_s
 from yarl import URL
 from gatekeeper.agents.captcha_agent import CaptchaAgent
 from gatekeeper.config import config
-from gatekeeper.events.auth_events import SessionEvents
+from gatekeeper.events.auth_events import AuthEvents
 from gatekeeper.utils.playwright_utils import PlaywrightUtils
 
 class AuthAgent:
@@ -37,7 +37,7 @@ class AuthAgent:
     )
     async def login_if_needed(self, captcha_agent: CaptchaAgent, redirect_url: URL) -> None:
         logger.info("Ensuring authenticated session (redirect={})", redirect_url)
-        async with SessionEvents(self.__page) as events:
+        async with AuthEvents(self.__page) as events:
             await self.__page.goto(str(redirect_url), wait_until="domcontentloaded")
             if await self.__page.locator("//egs-navigation").get_attribute("isloggedin") == "true":
                 logger.info("Already logged in, skipping login flow")
@@ -60,7 +60,7 @@ class AuthAgent:
             logger.info("Login flow finished: redirecting back to target page")
             await self.__page.goto(str(redirect_url), wait_until="domcontentloaded")
 
-    async def __handle_post_login(self, events: SessionEvents) -> None:
+    async def __handle_post_login(self, events: AuthEvents) -> None:
         button_ids: List[str] = [
             "#link-success",
             "#login-reminder-prompt-setup-tfa-skip",

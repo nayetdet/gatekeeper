@@ -3,7 +3,7 @@ from contextlib import suppress
 from typing import Self, Dict, Any
 from playwright.async_api import Page, Response
 
-class SessionEvents:
+class AuthEvents:
     def __init__(self, page: Page) -> None:
         self.__page: Page = page
         self.__login_success: Event = Event()
