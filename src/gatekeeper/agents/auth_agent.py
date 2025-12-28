@@ -38,6 +38,7 @@ class AuthAgent:
     async def login_if_needed(self, captcha_agent: CaptchaAgent, redirect_url: URL) -> None:
         logger.info("Ensuring authenticated session (redirect={})", redirect_url)
         async with AuthEvents(self.__page) as events:
+            logger.info("Navigating to target page to check session")
             await self.__page.goto(str(redirect_url), wait_until="domcontentloaded")
             if await self.__page.locator("//egs-navigation").get_attribute("isloggedin") == "true":
                 logger.info("Already logged in, skipping login flow")
@@ -45,17 +46,22 @@ class AuthAgent:
 
             logger.info("Not authenticated, starting login flow")
             await self.__page.goto(str(self.get_auth_url()), wait_until="domcontentloaded")
+
+            logger.info("Submitting login credentials")
             await PlaywrightUtils.submit_input(page=self.__page, input_selector="#email", button_selector="#continue", value=config.EPIC_GAMES_EMAIL)
             await PlaywrightUtils.submit_input(page=self.__page, input_selector="#password", button_selector="#sign-in", value=config.EPIC_GAMES_PASSWORD)
+
+            logger.info("Waiting for captcha challenge if present")
             await captcha_agent.wait_for_challenge()
 
             with suppress(asyncio.TimeoutError):
                 await asyncio.wait_for(events.login_success.wait(), timeout=60)
-                logger.info("Login successful")
+                logger.success("Login successful")
 
             with suppress(asyncio.TimeoutError):
+                logger.info("Handling post-login prompts")
                 await asyncio.wait_for(self.__handle_post_login(events), timeout=60)
-                logger.info("Post login successful")
+                logger.success("Post login successful")
 
             logger.info("Login flow finished: redirecting back to target page")
             await self.__page.goto(str(redirect_url), wait_until="domcontentloaded")

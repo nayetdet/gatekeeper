@@ -14,11 +14,14 @@ class ClaimAgent:
         logger.info("Starting claim flow for game: {}", url)
         purchase_button: Locator = self.__page.locator("[data-testid='purchase-cta-button']")
         if not await purchase_button.is_disabled():
+            logger.info("Purchase button enabled, attempting checkout")
             await purchase_button.click()
             await self.__handle_order_confirmation()
+
+            logger.info("Order confirmation completed, awaiting captcha if present")
             await captcha_agent.wait_for_challenge()
         else: logger.info("Game already owned or unavailable: {}", url)
-        logger.info("Persisting claimed game to database: {}", url)
+        logger.success("Persisting claimed game to database: {}", url)
         await GameRepository.create(Game(url=str(url)))
 
     async def __handle_order_confirmation(self) -> None:

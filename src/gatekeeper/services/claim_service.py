@@ -24,7 +24,8 @@ class ClaimService:
             async with CaptchaAgent(page) as captcha_agent:
                 auth_agent: AuthAgent = AuthAgent(page)
                 claim_agent: ClaimAgent = ClaimAgent(page)
-                for url in urls:
+                for index, url in enumerate(urls, start=1):
+                    logger.info("Processing game {}/{}: {}", index, len(urls), url)
                     await auth_agent.login_if_needed(captcha_agent=captcha_agent, redirect_url=url)
                     await cls.__claim_game(claim_agent=claim_agent, captcha_agent=captcha_agent, url=url)
 
@@ -37,4 +38,5 @@ class ClaimService:
         reraise=True
     )
     async def __claim_game(claim_agent: ClaimAgent, captcha_agent: CaptchaAgent, url: URL) -> None:
+        logger.info("Claim attempt started: {}", url)
         await claim_agent.claim_game(captcha_agent=captcha_agent, url=url)
