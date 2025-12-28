@@ -35,12 +35,10 @@ class AuthAgent:
         before_sleep=before_sleep_log(logger, log_level=logging.WARNING),
         reraise=True
     )
-    async def login_if_needed(self, captcha_agent: CaptchaAgent, redirect_url: URL) -> None:
-        logger.info("Ensuring authenticated session (redirect={})", redirect_url)
+    async def login_if_needed(self, captcha_agent: CaptchaAgent) -> None:
+        logger.info("Ensuring authenticated session with Epic Games")
         async with AuthEvents(self.__page) as events:
-            logger.info("Navigating to target page to check session")
-            await self.__page.goto(str(redirect_url), wait_until="domcontentloaded")
-            if await self.__page.locator("//egs-navigation").get_attribute("isloggedin") == "true":
+            if await self.__isloggedin():
                 logger.info("Already logged in, skipping login flow")
                 return
 
@@ -63,8 +61,9 @@ class AuthAgent:
                 await asyncio.wait_for(self.__handle_post_login(events), timeout=60)
                 logger.success("Post login successful")
 
-            logger.info("Login flow finished: redirecting back to target page")
-            await self.__page.goto(str(redirect_url), wait_until="domcontentloaded")
+    async def __isloggedin(self) -> bool:
+        await self.__page.goto(str(self.BASE_AUTH_URL), wait_until="domcontentloaded")
+        return await self.__page.locator("//egs-navigation").get_attribute("isloggedin") == "true"
 
     async def __handle_post_login(self, events: AuthEvents) -> None:
         button_ids: List[str] = [

@@ -1,9 +1,7 @@
-import logging
 from typing import List
 from camoufox import AsyncCamoufox
 from loguru import logger
 from playwright.async_api import Page
-from tenacity import retry, stop_after_attempt, wait_fixed, before_log, before_sleep_log
 from yarl import URL
 from gatekeeper.agents.auth_agent import AuthAgent
 from gatekeeper.agents.captcha_agent import CaptchaAgent
@@ -26,17 +24,5 @@ class ClaimService:
                 claim_agent: ClaimAgent = ClaimAgent(page)
                 for index, url in enumerate(urls, start=1):
                     logger.info("Processing game {}/{}: {}", index, len(urls), url)
-                    await auth_agent.login_if_needed(captcha_agent=captcha_agent, redirect_url=url)
-                    await cls.__claim_game(claim_agent=claim_agent, captcha_agent=captcha_agent, url=url)
-
-    @staticmethod
-    @retry(
-        stop=stop_after_attempt(3),
-        wait=wait_fixed(5),
-        before=before_log(logger, logging.INFO),
-        before_sleep=before_sleep_log(logger, logging.WARNING),
-        reraise=True
-    )
-    async def __claim_game(claim_agent: ClaimAgent, captcha_agent: CaptchaAgent, url: URL) -> None:
-        logger.info("Claim attempt started: {}", url)
-        await claim_agent.claim_game(captcha_agent=captcha_agent, url=url)
+                    await auth_agent.login_if_needed(captcha_agent=captcha_agent)
+                    await claim_agent.claim_game(captcha_agent=captcha_agent, url=url)
