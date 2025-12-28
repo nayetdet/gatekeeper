@@ -1,15 +1,11 @@
 import asyncio
-import logging
-from contextlib import suppress
 from loguru import logger
-from typing import List
 from playwright.async_api import Page, Locator, expect
-from tenacity import retry, stop_after_attempt, wait_fixed, before_log, before_sleep_log
 from yarl import URL
 from gatekeeper.agents.captcha_agent import CaptchaAgent
 from gatekeeper.config import config
+from gatekeeper.decorators.retry_decorator import retry
 from gatekeeper.events.auth_events import AuthEvents
-from gatekeeper.utils.playwright_utils import PlaywrightUtils
 
 class AuthAgent:
     __BASE_AUTH_URL: URL = URL("https://www.epicgames.com/account/personal")
@@ -35,17 +31,11 @@ class AuthAgent:
             }
         )
 
-    @retry(
-        stop=stop_after_attempt(3),
-        wait=wait_fixed(5),
-        before=before_log(logger, logging.INFO),
-        before_sleep=before_sleep_log(logger, log_level=logging.WARNING),
-        reraise=True
-    )
+    @retry(max_attempts=5, wait=10)
     async def login_if_needed(self, captcha_agent: CaptchaAgent, redirect_url: URL) -> None:
         logger.info("Ensuring authenticated session with Epic Games (redirect_url={})", redirect_url)
         async with AuthEvents(self.__page) as events:
-            await self.__page.goto(str(redirect_url), wait_until="domcontentloaded")
+            await self.__handle_redirection(redirect_url)
             if await self.__page.locator("//egs-navigation").get_attribute("isloggedin") == "true":
                 logger.info("Already logged in, skipping login flow")
                 return
@@ -54,37 +44,33 @@ class AuthAgent:
             await self.__page.goto(str(self.get_invalidated_auth_url()), wait_until="domcontentloaded")
 
             logger.info("Submitting login credentials")
-            await PlaywrightUtils.submit_input(page=self.__page, input_selector="#email", button_selector="#continue", value=config.EPIC_GAMES_EMAIL)
-            await PlaywrightUtils.submit_input(page=self.__page, input_selector="#password", button_selector="#sign-in", value=config.EPIC_GAMES_PASSWORD)
+            await self.__handle_input_submission(input_selector="#email", button_selector="#continue", value=config.EPIC_GAMES_EMAIL)
+            await self.__handle_input_submission(input_selector="#password", button_selector="#sign-in", value=config.EPIC_GAMES_PASSWORD)
 
             logger.info("Waiting for captcha challenge if present")
             await captcha_agent.wait_for_challenge()
 
-            with suppress(asyncio.TimeoutError):
-                await asyncio.wait_for(events.login_success.wait(), timeout=60)
-                logger.success("Login successful")
+            logger.info("Waiting for login success event")
+            await asyncio.wait_for(events.login_success.wait(), timeout=60)
+            logger.success("Login successful")
 
-            with suppress(asyncio.TimeoutError):
-                logger.info("Handling post-login prompts")
-                await asyncio.wait_for(self.__handle_post_login(events), timeout=60)
-                logger.success("Post login successful")
+        logger.info("Redirecting back to target page")
+        await self.__handle_redirection(redirect_url)
 
-            logger.info("Login flow finished: redirecting back to target page")
-            await self.__page.goto(str(redirect_url), wait_until="domcontentloaded")
+    @retry(max_attempts=3, wait=5)
+    async def __handle_input_submission(self, input_selector: str, button_selector: str, value: str) -> None:
+        input_element: Locator = self.__page.locator(input_selector)
+        await expect(input_element).to_be_visible()
+        await expect(input_element).to_be_editable()
+        await input_element.clear()
+        await input_element.type(value)
 
-    async def __handle_post_login(self, events: AuthEvents) -> None:
-        button_ids: List[str] = [
-            "#link-success",
-            "#login-reminder-prompt-setup-tfa-skip",
-            "#yes"
-        ]
+        button_element: Locator = self.__page.locator(button_selector)
+        await expect(button_element).to_be_visible()
+        await expect(button_element).to_be_enabled()
+        await button_element.scroll_into_view_if_needed()
+        await button_element.click()
 
-        await self.__page.goto(str(self.get_auth_url()), wait_until="networkidle")
-        while not events.csrf_refresh.is_set() and button_ids:
-            await self.__page.wait_for_timeout(500)
-            for button_id in button_ids.copy():
-                with suppress(Exception):
-                    reminder_button: Locator = self.__page.locator(button_id)
-                    await expect(reminder_button).to_be_visible()
-                    await reminder_button.click()
-                    button_ids.remove(button_id)
+    async def __handle_redirection(self, redirect_url: URL) -> None:
+        await self.__page.goto(str(self.get_auth_url()), wait_until="domcontentloaded")
+        await self.__page.goto(str(redirect_url), wait_until="domcontentloaded")
