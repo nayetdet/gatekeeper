@@ -25,7 +25,8 @@ class ClaimAgent:
     async def __handle_purchase(self, captcha_agent: CaptchaAgent) -> None:
         purchase_button: Locator = self.__page.locator("//aside//button[@data-testid='purchase-cta-button']")
         await expect(purchase_button).to_be_visible()
-        if await purchase_button.is_disabled():
+        try: await expect(purchase_button).to_be_enabled()
+        except AssertionError:
             logger.warning("Purchase button disabled, game already owned or unavailable")
             return
 
