@@ -7,14 +7,19 @@ from gatekeeper.models.game import Game
 from gatekeeper.repositories.game_repository import GameRepository
 
 class DiscoveryService:
-    BASE_STORE_URL: URL = URL("https://store.epicgames.com")
-    BASE_STORE_PROMOTIONS_URL: URL = URL("https://store-site-backend-static-ipv4.ak.epicgames.com/freeGamesPromotions")
+    __BASE_STORE_URL: URL = URL("https://store.epicgames.com")
+    __BASE_STORE_PROMOTIONS_URL: URL = URL("https://store-site-backend-static-ipv4.ak.epicgames.com/freeGamesPromotions")
 
     @classmethod
-    def get_promotions_url(cls) -> URL:
+    def get_store_url(cls) -> URL:
+        locale: str = config.EPIC_GAMES_LOCALE
+        return cls.__BASE_STORE_URL / locale
+
+    @classmethod
+    def get_store_promotions_url(cls) -> URL:
         locale: str = config.EPIC_GAMES_LOCALE
         country: str = config.EPIC_GAMES_COUNTRY
-        return cls.BASE_STORE_PROMOTIONS_URL.with_query(
+        return cls.__BASE_STORE_PROMOTIONS_URL.with_query(
             {
                 "locale": locale,
                 "country": country,
@@ -25,16 +30,15 @@ class DiscoveryService:
         )
 
     @classmethod
-    def get_game_url(cls, slug: str) -> URL:
-        locale: str = config.EPIC_GAMES_LOCALE
-        return cls.BASE_STORE_URL / locale / "p" / slug
+    def get_store_product_url(cls, product_slug: str) -> URL:
+        return cls.get_store_url() / "p" / product_slug
 
     @classmethod
     async def get_free_games(cls) -> List[URL]:
         logger.info("Fetching free games from Epic Games promotions API")
         urls: List[URL] = []
         async with aiohttp.ClientSession() as session:
-            async with session.get(cls.get_promotions_url()) as response:
+            async with session.get(cls.get_store_promotions_url()) as response:
                 response.raise_for_status()
                 data: Dict[str, Any] = await response.json()
 
@@ -46,7 +50,7 @@ class DiscoveryService:
 
             discount_price: float = float(element.get("price", {}).get("totalPrice", {}).get("discountPrice", -1))
             if discount_price == 0:
-                urls.append(cls.get_game_url(slug))
+                urls.append(cls.get_store_product_url(slug))
 
         logger.info("Total free games found: {}", len(urls))
         return urls

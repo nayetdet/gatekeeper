@@ -12,7 +12,7 @@ from gatekeeper.events.auth_events import AuthEvents
 from gatekeeper.utils.playwright_utils import PlaywrightUtils
 
 class AuthAgent:
-    BASE_AUTH_URL: URL = URL("https://www.epicgames.com/account/personal")
+    __BASE_AUTH_URL: URL = URL("https://www.epicgames.com/account/personal")
 
     def __init__(self, page: Page) -> None:
         self.__page: Page = page
@@ -20,9 +20,16 @@ class AuthAgent:
     @classmethod
     def get_auth_url(cls) -> URL:
         lang: str = config.EPIC_GAMES_LOCALE
-        return cls.BASE_AUTH_URL.with_query(
+        return cls.__BASE_AUTH_URL.with_query(
             {
-                "lang": lang,
+                "lang": lang
+            }
+        )
+
+    @classmethod
+    def get_invalidated_auth_url(cls) -> URL:
+        return cls.get_auth_url().update_query(
+            {
                 "productName": "egs",
                 "sessionInvalidated": "true"
             }
@@ -35,15 +42,16 @@ class AuthAgent:
         before_sleep=before_sleep_log(logger, log_level=logging.WARNING),
         reraise=True
     )
-    async def login_if_needed(self, captcha_agent: CaptchaAgent) -> None:
-        logger.info("Ensuring authenticated session with Epic Games")
+    async def login_if_needed(self, captcha_agent: CaptchaAgent, redirect_url: URL) -> None:
+        logger.info("Ensuring authenticated session with Epic Games (redirect_url={})", redirect_url)
         async with AuthEvents(self.__page) as events:
-            if await self.__isloggedin():
+            await self.__page.goto(str(redirect_url), wait_until="domcontentloaded")
+            if await self.__page.locator("//egs-navigation").get_attribute("isloggedin") == "true":
                 logger.info("Already logged in, skipping login flow")
                 return
 
             logger.info("Not authenticated, starting login flow")
-            await self.__page.goto(str(self.get_auth_url()), wait_until="domcontentloaded")
+            await self.__page.goto(str(self.get_invalidated_auth_url()), wait_until="domcontentloaded")
 
             logger.info("Submitting login credentials")
             await PlaywrightUtils.submit_input(page=self.__page, input_selector="#email", button_selector="#continue", value=config.EPIC_GAMES_EMAIL)
@@ -61,9 +69,8 @@ class AuthAgent:
                 await asyncio.wait_for(self.__handle_post_login(events), timeout=60)
                 logger.success("Post login successful")
 
-    async def __isloggedin(self) -> bool:
-        await self.__page.goto(str(self.BASE_AUTH_URL), wait_until="domcontentloaded")
-        return await self.__page.locator("//egs-navigation").get_attribute("isloggedin") == "true"
+            logger.info("Login flow finished: redirecting back to target page")
+            await self.__page.goto(str(redirect_url), wait_until="domcontentloaded")
 
     async def __handle_post_login(self, events: AuthEvents) -> None:
         button_ids: List[str] = [
@@ -72,7 +79,7 @@ class AuthAgent:
             "#yes"
         ]
 
-        await self.__page.goto(str(self.BASE_AUTH_URL), wait_until="networkidle")
+        await self.__page.goto(str(self.get_auth_url()), wait_until="networkidle")
         while not events.csrf_refresh.is_set() and button_ids:
             await self.__page.wait_for_timeout(500)
             for button_id in button_ids.copy():

@@ -24,5 +24,5 @@ class ClaimService:
                 claim_agent: ClaimAgent = ClaimAgent(page)
                 for index, url in enumerate(urls, start=1):
                     logger.info("Processing game {}/{}: {}", index, len(urls), url)
-                    await auth_agent.login_if_needed(captcha_agent=captcha_agent)
+                    await auth_agent.login_if_needed(captcha_agent=captcha_agent, redirect_url=url)
                     await claim_agent.claim_game(captcha_agent=captcha_agent, url=url)

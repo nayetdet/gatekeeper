@@ -22,7 +22,10 @@ class ClaimAgent:
     )
     async def claim_game(self, captcha_agent: CaptchaAgent, url: URL) -> None:
         logger.info("Starting claim flow for game: {}", url)
-        await self.__page.goto(str(url), wait_until="domcontentloaded")
+        if url != URL(self.__page.url):
+            logger.info("Navigating to game page (from={}, to={})", self.__page.url, url)
+            await self.__page.goto(str(url), wait_until="domcontentloaded")
+        else: logger.info("Already on game page, navigation skipped")
 
         purchase_button: Locator = self.__page.locator("[data-testid='purchase-cta-button']")
         if await purchase_button.is_enabled():
