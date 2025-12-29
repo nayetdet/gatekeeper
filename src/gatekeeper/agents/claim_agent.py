@@ -14,7 +14,7 @@ class ClaimAgent:
     @retry(max_attempts=5, wait=10)
     async def claim_game(self, captcha_agent: CaptchaAgent, url: URL) -> None:
         logger.info("Starting game claim: {}", url)
-        await self.__handle_redirection(url)
+        await self.__page.goto(str(url), wait_until="domcontentloaded")
         if not await self.__is_already_claimed():
             await self.__handle_purchase(captcha_agent)
         else: logger.warning("Game already owned or unavailable, purchase skipped")
@@ -35,12 +35,6 @@ class ClaimAgent:
         logger.info("Waiting for captcha challenge if present")
         await captcha_agent.wait_for_challenge()
         logger.success("Purchase completed")
-
-    async def __handle_redirection(self, redirect_url: URL) -> None:
-        if redirect_url != URL(self.__page.url):
-            logger.info("Navigating to game page (from={}, to={})", self.__page.url, redirect_url)
-            await self.__page.goto(str(redirect_url), wait_until="domcontentloaded")
-        else: logger.info("Already on game page, navigation skipped")
 
     async def __is_already_claimed(self) -> bool:
         cart_button: Locator = self.__page.locator("//aside//button[@data-testid='add-to-cart-cta-button-pdp-sidebar']")

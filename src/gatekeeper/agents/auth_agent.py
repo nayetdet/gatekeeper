@@ -65,8 +65,10 @@ class AuthAgent:
             logger.success("Login successful")
 
     async def __handle_redirection(self, redirect_url: URL) -> None:
-        logger.info("Redirecting back to page")
+        logger.info("Redirecting to auth page")
         await self.__page.goto(str(self.get_auth_url()), wait_until="domcontentloaded")
+
+        logger.info("Redirecting to target page: {}", redirect_url)
         await self.__page.goto(str(redirect_url), wait_until="domcontentloaded")
 
     async def __is_logged_in(self) -> bool:
