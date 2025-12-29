@@ -5,6 +5,7 @@ services:
       dockerfile: ./docker/uv/Dockerfile
     container_name: gatekeeper
     environment:
+      TZ: ${TZ}
       EPIC_GAMES_EMAIL: ${EPIC_GAMES_EMAIL}
       EPIC_GAMES_PASSWORD: ${EPIC_GAMES_PASSWORD}
       EPIC_GAMES_LOCALE: ${EPIC_GAMES_LOCALE}
