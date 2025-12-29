@@ -10,7 +10,7 @@ class Config(AgentConfig):
     EPIC_GAMES_LOCALE: str = Field(default_factory=lambda: getenv("EPIC_GAMES_LOCALE"))
     EPIC_GAMES_COUNTRY: str = Field(default_factory=lambda: getenv("EPIC_GAMES_COUNTRY"))
 
-    # Agent Config
+    # Agent
     MODEL: str = "gemini-2.5-flash"
     CHALLENGE_CLASSIFIER_MODEL: FastShotModelType = MODEL
     IMAGE_CLASSIFIER_MODEL: SCoTModelType = MODEL

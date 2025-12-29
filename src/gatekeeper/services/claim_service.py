@@ -10,14 +10,14 @@ from gatekeeper.config import config
 from gatekeeper.services.discovery_service import DiscoveryService
 
 class ClaimService:
-    @classmethod
-    async def claim_games(cls) -> None:
+    @staticmethod
+    async def claim_games() -> None:
         urls: List[URL] = await DiscoveryService.get_unclaimed_free_games()
         if not urls:
             logger.info("No unclaimed games found, skipping")
             return
 
-        async with AsyncCamoufox(persistent_context=True, user_data_dir=config.BROWSER_PROFILE_PATH, humanize=0.2, headless=True) as browser:
+        async with AsyncCamoufox(persistent_context=True, user_data_dir=config.BROWSER_PROFILE_PATH, humanize=1, headless=True) as browser:
             page: Page = browser.pages[0] if browser.pages else await browser.new_page()
             async with CaptchaAgent(page) as captcha_agent:
                 auth_agent: AuthAgent = AuthAgent(page)
