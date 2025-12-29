@@ -499,7 +499,7 @@ requires-dist = [
     { name = "loguru", specifier = ">=0.7.3" },
     { name = "playwright", specifier = ">=1.55.0" },
     { name = "python-dotenv", specifier = ">=1.2.1" },
-    { name = "sqlmodel", specifier = ">=0.0.30" },
+    { name = "sqlmodel", specifier = ">=0.0.31" },
     { name = "tenacity", specifier = ">=9.1.2" },
 ]
 
