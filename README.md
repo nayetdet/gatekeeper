@@ -20,4 +20,3 @@ docker compose --env-file .env up -d
 
 > ⚠️ **Login com 2FA desativado**  
 > Para conseguir logar, desative o 2FA da conta.
-

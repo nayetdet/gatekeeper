@@ -17,7 +17,7 @@ class ClaimService:
             logger.info("No unclaimed products found, skipping")
             return
 
-        async with AsyncCamoufox(persistent_context=True, user_data_dir=config.BROWSER_PROFILE_PATH, humanize=1, headless=False) as browser:
+        async with AsyncCamoufox(persistent_context=True, user_data_dir=config.BROWSER_PROFILE_PATH, humanize=1, headless=True) as browser:
             page: Page = browser.pages[0] if browser.pages else await browser.new_page()
             async with CaptchaAgent(page) as captcha_agent:
                 auth_agent: AuthAgent = AuthAgent(page)
