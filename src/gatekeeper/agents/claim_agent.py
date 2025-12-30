@@ -23,9 +23,10 @@ class ClaimAgent:
         logger.info("Attempting purchase")
         purchase_button: Locator = self.__page.locator("//button[@data-testid='purchase-cta-button']").first
 
-        action_buttons_count: int = await PlaywrightUtils.count(purchase_button.locator("../../div//button"))
-        logger.info("Product action buttons detected: {}", action_buttons_count)
-        if action_buttons_count == 1:
+        action_container: Locator = purchase_button.locator("../../div//button")
+        action_container_buttons_count: int = await PlaywrightUtils.count(action_container)
+        logger.info("Action buttons detected: {}", action_container_buttons_count)
+        if action_container_buttons_count == 1:
             logger.warning("Product already owned or unavailable, purchase skipped")
             return
 
