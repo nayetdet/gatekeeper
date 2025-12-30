@@ -5,7 +5,6 @@ class PlaywrightUtils:
     @staticmethod
     @retry(max_attempts=3, wait=10)
     async def count(element: Locator) -> int:
-        await expect(element).to_be_visible()
         return await element.count()
 
     @staticmethod
