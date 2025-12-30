@@ -11,18 +11,18 @@ from gatekeeper.services.discovery_service import DiscoveryService
 
 class ClaimService:
     @staticmethod
-    async def claim_games() -> None:
-        urls: List[URL] = await DiscoveryService.get_unclaimed_free_games()
+    async def claim_products() -> None:
+        urls: List[URL] = await DiscoveryService.get_unclaimed_free_products()
         if not urls:
-            logger.info("No unclaimed games found, skipping")
+            logger.info("No unclaimed products found, skipping")
             return
 
-        async with AsyncCamoufox(persistent_context=True, user_data_dir=config.BROWSER_PROFILE_PATH, humanize=1, headless=True) as browser:
+        async with AsyncCamoufox(persistent_context=True, user_data_dir=config.BROWSER_PROFILE_PATH, humanize=1, headless=False) as browser:
             page: Page = browser.pages[0] if browser.pages else await browser.new_page()
             async with CaptchaAgent(page) as captcha_agent:
                 auth_agent: AuthAgent = AuthAgent(page)
                 claim_agent: ClaimAgent = ClaimAgent(page)
                 for index, url in enumerate(urls, start=1):
-                    logger.info("Processing game {}/{}: {}", index, len(urls), url)
+                    logger.info("Processing product {}/{}: {}", index, len(urls), url)
                     await auth_agent.login_if_needed(captcha_agent=captcha_agent, redirect_url=url)
-                    await claim_agent.claim_game(captcha_agent=captcha_agent, url=url)
+                    await claim_agent.claim_product(captcha_agent=captcha_agent, url=url)

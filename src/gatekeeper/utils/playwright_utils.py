@@ -3,17 +3,24 @@ from gatekeeper.decorators.retry_decorator import retry
 
 class PlaywrightUtils:
     @staticmethod
-    @retry(max_attempts=3, wait=5)
-    async def type(input_element: Locator, value: str) -> None:
-        await expect(input_element).to_be_visible()
-        await expect(input_element).to_be_editable()
-        await input_element.clear()
-        await input_element.type(value)
+    @retry(max_attempts=3, wait=10)
+    async def count(element: Locator) -> int:
+        await expect(element).to_be_visible()
+        return await element.count()
 
     @staticmethod
-    @retry(max_attempts=3, wait=5)
-    async def click(button_element: Locator) -> None:
-        await expect(button_element).to_be_visible()
-        await expect(button_element).to_be_enabled()
-        await button_element.scroll_into_view_if_needed()
-        await button_element.click()
+    @retry(max_attempts=3, wait=10)
+    async def type(locator: Locator, value: str) -> None:
+        await expect(locator).to_be_visible()
+        await expect(locator).to_be_editable()
+        await locator.clear()
+        await locator.type(value)
+
+    @staticmethod
+    @retry(max_attempts=3, wait=10)
+    async def click(locator: Locator) -> None:
+        await expect(locator).to_be_visible()
+        await expect(locator).to_be_enabled()
+        await locator.scroll_into_view_if_needed()
+        await locator.click(trial=True)
+        await locator.click()
