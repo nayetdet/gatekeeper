@@ -1,8 +1,9 @@
 services:
   gatekeeper:
-    build:
-      context: .
-      dockerfile: ./docker/uv/Dockerfile
+#    build:
+#      context: .
+#      dockerfile: ./docker/uv/Dockerfile
+    image: docker.io/nayetdet/gatekeeper:latest
     container_name: gatekeeper
     environment:
       TZ: ${TZ}
@@ -10,10 +11,11 @@ services:
       EPIC_GAMES_PASSWORD: ${EPIC_GAMES_PASSWORD}
       EPIC_GAMES_LOCALE: ${EPIC_GAMES_LOCALE}
       EPIC_GAMES_COUNTRY: ${EPIC_GAMES_COUNTRY}
+      EPIC_GAMES_CRONTAB: ${EPIC_GAMES_CRONTAB}
       GEMINI_API_KEY: ${GEMINI_API_KEY}
     volumes:
       - gatekeeper_data:/app/data
-    restart: unless-stopped
+    restart: no # Change to "unless-stopped" if a crontab is set
 
 volumes:
   gatekeeper_data:

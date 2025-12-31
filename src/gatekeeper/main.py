@@ -1,14 +1,19 @@
 import asyncio
 from datetime import datetime, timezone
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from apscheduler.triggers.interval import IntervalTrigger
+from apscheduler.triggers.cron import CronTrigger
+from gatekeeper.config import config
 from gatekeeper.jobs.claim_job import ClaimJob
 
 async def main() -> None:
-    scheduler: AsyncIOScheduler = AsyncIOScheduler(timezone="UTC")
+    if not config.EPIC_GAMES_CRONTAB:
+        await ClaimJob.run()
+        return
+
+    scheduler: AsyncIOScheduler = AsyncIOScheduler()
     scheduler.add_job(
         ClaimJob.run,
-        trigger=IntervalTrigger(hours=3),
+        trigger=CronTrigger.from_crontab(config.EPIC_GAMES_CRONTAB),
         id=ClaimJob.identifier(),
         replace_existing=True,
         max_instances=1,

@@ -11,6 +11,7 @@ class Config(AgentConfig):
     EPIC_GAMES_PASSWORD: str = Field(default_factory=lambda: os.getenv("EPIC_GAMES_PASSWORD"))
     EPIC_GAMES_LOCALE: str = Field(default_factory=lambda: os.getenv("EPIC_GAMES_LOCALE"))
     EPIC_GAMES_COUNTRY: str = Field(default_factory=lambda: os.getenv("EPIC_GAMES_COUNTRY"))
+    EPIC_GAMES_CRONTAB: str = Field(default_factory=lambda: os.getenv("EPIC_GAMES_CRONTAB"))
 
     # Models
     MODEL: str = "gemini-2.5-flash"
