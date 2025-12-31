@@ -28,5 +28,5 @@ jobs:
           file: docker/uv/Dockerfile
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/gatekeeper:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/gatekeeper:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:${{ github.sha }}
