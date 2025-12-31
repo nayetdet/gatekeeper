@@ -4,7 +4,7 @@ from hcaptcha_challenger import AgentV
 from playwright.async_api import Page
 from gatekeeper.config import config
 
-class CaptchaAgent:
+class HCaptchaAgent:
     def __init__(self, page: Page) -> None:
         self.__agent: Optional[AgentV] = AgentV(page=page, agent_config=config)
 

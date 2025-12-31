@@ -2,7 +2,7 @@ import asyncio
 from loguru import logger
 from playwright.async_api import Page
 from yarl import URL
-from gatekeeper.agents.captcha_agent import CaptchaAgent
+from gatekeeper.agents.hcaptcha_agent import HCaptchaAgent
 from gatekeeper.config import config
 from gatekeeper.decorators.retry_decorator import retry
 from gatekeeper.events.auth_events import AuthEvents
@@ -33,17 +33,17 @@ class AuthAgent:
         )
 
     @retry(max_attempts=5, wait=30)
-    async def login_if_needed(self, captcha_agent: CaptchaAgent, redirect_url: URL) -> None:
+    async def login_if_needed(self, hcaptcha_agent: HCaptchaAgent, redirect_url: URL) -> None:
         logger.info("Ensuring authenticated session with Epic Games (redirect_url={})", redirect_url)
         await self.__handle_redirection(redirect_url)
         if await self.__is_logged_in():
             logger.info("Already logged in, skipping login")
             return
 
-        await self.__handle_login_form(captcha_agent)
+        await self.__handle_login_form(hcaptcha_agent)
         await self.__handle_redirection(redirect_url)
 
-    async def __handle_login_form(self, captcha_agent: CaptchaAgent) -> None:
+    async def __handle_login_form(self, hcaptcha_agent: HCaptchaAgent) -> None:
         async with AuthEvents(self.__page) as events:
             logger.info("User not authenticated, attempting login")
             await self.__page.goto(str(self.get_invalidated_auth_url()), wait_until="domcontentloaded")
@@ -58,7 +58,7 @@ class AuthAgent:
             await PlaywrightUtils.click(self.__page.locator("#sign-in"))
 
             logger.info("Waiting for captcha challenge if present")
-            await captcha_agent.wait_for_challenge()
+            await hcaptcha_agent.wait_for_challenge()
 
             logger.info("Waiting for login success event")
             await asyncio.wait_for(events.login_success.wait(), timeout=60)

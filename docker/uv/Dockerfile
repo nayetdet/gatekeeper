@@ -1,9 +1,9 @@
 # Build Stage
 FROM ghcr.io/astral-sh/uv:python3.13-trixie-slim AS builder
-ENV UV_COMPILE_BYTECODE=1 \
-    UV_LINK_MODE=copy \
-    UV_NO_DEV=1 \
-    UV_PYTHON_DOWNLOADS=0
+ENV UV_NO_DEV=1 \
+    UV_PYTHON_DOWNLOADS=0 \
+    UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy
 
 WORKDIR /app
 RUN --mount=type=cache,target=/root/.cache/uv \
@@ -17,8 +17,8 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 # Runtime Stage
 FROM python:3.13-slim-trixie
-ENV PATH="/app/.venv/bin:$PATH" \
-    DEBIAN_FRONTEND=noninteractive
+ENV DEBIAN_FRONTEND=noninteractive \
+    PATH="/app/.venv/bin:$PATH"
 
 RUN apt-get update  \
     && apt-get install -y --no-install-recommends \
@@ -36,8 +36,7 @@ RUN camoufox fetch
 COPY docker/uv/scripts/entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 
-USER root
 WORKDIR /app
-VOLUME ["/app/data", "/app/tmp"]
+VOLUME ["/app/data"]
 ENTRYPOINT ["/app/entrypoint.sh"]
 CMD ["python", "-m", "src.gatekeeper.main"]
