@@ -1,11 +1,8 @@
 name: Docker CI
 
 on:
-  push:
-    branches: [ "main" ]
-    tags:
-      - "v*"
-  workflow_dispatch:
+  release:
+    types: [published]
 
 jobs:
   docker-ci:
