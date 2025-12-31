@@ -3,7 +3,7 @@ services:
 #    build:
 #      context: .
 #      dockerfile: ./docker/uv/Dockerfile
-    image: docker.io/nayetdet/gatekeeper:latest
+    image: ghcr.io/nayetdet/gatekeeper:latest
     container_name: gatekeeper
     environment:
       TZ: ${TZ}
@@ -15,7 +15,7 @@ services:
       GEMINI_API_KEY: ${GEMINI_API_KEY}
     volumes:
       - gatekeeper_data:/app/data
-    restart: no # Change to "unless-stopped" if a crontab is set
+    restart: unless-stopped # Set to "no" when no cron schedule is configured
 
 volumes:
   gatekeeper_data:

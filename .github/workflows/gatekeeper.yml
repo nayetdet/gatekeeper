@@ -1,0 +1,76 @@
+name: Gatekeeper
+
+on:
+  workflow_dispatch:
+#  schedule:
+#    - cron: '0 */3 * * *'
+
+env:
+  IMAGE: ghcr.io/nayetdet/gatekeeper:latest
+  BRANCH_NAME: state
+
+jobs:
+  gatekeeper:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    concurrency:
+      group: gatekeeper
+      cancel-in-progress: false
+
+    steps:
+      - name: Check repository visibility
+        run: |
+          if [[ "${{ github.event.repository.private }}" != "true" ]]; then
+            echo "This workflow must be run in a private repository"
+            exit 0
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Switch to state branch
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+
+          git fetch origin --prune
+          if git ls-remote --exit-code --heads origin "$BRANCH_NAME" >/dev/null 2>&1; then
+            git checkout -B "$BRANCH_NAME" "origin/$BRANCH_NAME"
+          else
+            git checkout -b "$BRANCH_NAME"
+            git push -u origin "$BRANCH_NAME"
+          fi
+
+      - name: Pull image
+        run: docker pull ${{ env.IMAGE }}
+
+      - name: Run Gatekeeper
+        env:
+          TZ: ${{ secrets.TZ }}
+          EPIC_GAMES_EMAIL: ${{ secrets.EPIC_GAMES_EMAIL }}
+          EPIC_GAMES_PASSWORD: ${{ secrets.EPIC_GAMES_PASSWORD }}
+          EPIC_GAMES_LOCALE: ${{ secrets.EPIC_GAMES_LOCALE }}
+          EPIC_GAMES_COUNTRY: ${{ secrets.EPIC_GAMES_COUNTRY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          docker run --rm \
+            -e TZ \
+            -e EPIC_GAMES_EMAIL \
+            -e EPIC_GAMES_PASSWORD \
+            -e EPIC_GAMES_LOCALE \
+            -e EPIC_GAMES_COUNTRY \
+            -e GEMINI_API_KEY \
+            -v "$PWD/data:/app/data" \
+            ${{ env.IMAGE }}
+
+      - name: Persist data volume to state branch
+        if: always()
+        run: |
+          git status
+          git add data
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: persist gatekeeper run $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+            git push origin "$BRANCH_NAME"
+          fi
