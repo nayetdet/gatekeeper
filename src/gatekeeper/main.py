@@ -14,7 +14,7 @@ async def main() -> None:
         await ClaimJob.run()
         return
 
-    scheduler: AsyncIOScheduler = AsyncIOScheduler()
+    scheduler: AsyncIOScheduler = AsyncIOScheduler(timezone=timezone.utc)
     scheduler.add_job(
         ClaimJob.run,
         trigger=CronTrigger.from_crontab(config.EPIC_GAMES_CRONTAB),

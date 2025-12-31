@@ -1,5 +1,5 @@
 from enum import Enum
 
-class ProductType(Enum):
+class ProductPathType(Enum):
     PRODUCT = "p"
     BUNDLE = "bundles"

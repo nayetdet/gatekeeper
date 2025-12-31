@@ -32,7 +32,7 @@ class AuthAgent:
             }
         )
 
-    @retry(max_attempts=5, wait=30)
+    @retry(max_attempts=5, wait=10)
     async def login_if_needed(self, hcaptcha_agent: HCaptchaAgent, redirect_url: URL) -> None:
         logger.info("Ensuring authenticated session with Epic Games (redirect_url={})", redirect_url)
         await self.__handle_redirection(redirect_url)
