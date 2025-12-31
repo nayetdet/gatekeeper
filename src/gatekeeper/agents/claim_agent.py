@@ -6,6 +6,7 @@ from gatekeeper.decorators.retry_decorator import retry
 from gatekeeper.models.product import Product
 from gatekeeper.repositories.product_repository import ProductRepository
 from gatekeeper.utils.playwright_utils import PlaywrightUtils
+from gatekeeper.factories.store_url_factory import StoreUrlFactory
 
 class ClaimAgent:
     def __init__(self, page: Page) -> None:
@@ -16,6 +17,7 @@ class ClaimAgent:
         logger.info("Starting product claim: {}", url)
         await self.__page.goto(str(url), wait_until="domcontentloaded")
         await self.__handle_purchase(hcaptcha_agent)
+
         logger.success("Product claim completed, saving to database (url={})", url)
         await ProductRepository.create(Product(url=str(url)))
 
@@ -36,6 +38,8 @@ class ClaimAgent:
 
         logger.info("Waiting for captcha challenge if present")
         await hcaptcha_agent.wait_for_challenge()
+
+        await self.__page.wait_for_url(str(StoreUrlFactory.get_cart_success_url()))
         logger.success("Purchase successfully completed")
 
     @staticmethod

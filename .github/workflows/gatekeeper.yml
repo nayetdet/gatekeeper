@@ -59,7 +59,6 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
           docker run --rm \
-            --user "$(id -u):$(id -g)" \
             -e TZ \
             -e EPIC_GAMES_EMAIL \
             -e EPIC_GAMES_PASSWORD \
@@ -68,6 +67,12 @@ jobs:
             -e GEMINI_API_KEY \
             -v "$PWD/data:/app/data" \
             ${{ env.IMAGE }}
+
+      - name: Fix ownership and permissions on data volume
+        if: always()
+        run: |
+          sudo chown -R "$(id -u):$(id -g)" data
+          sudo chmod -R u+rwX data
 
       - name: Persist data volume to state branch
         if: always()

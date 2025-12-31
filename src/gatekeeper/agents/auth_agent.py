@@ -6,31 +6,12 @@ from gatekeeper.agents.hcaptcha_agent import HCaptchaAgent
 from gatekeeper.config import config
 from gatekeeper.decorators.retry_decorator import retry
 from gatekeeper.events.auth_events import AuthEvents
+from gatekeeper.factories.auth_url_factory import AuthUrlFactory
 from gatekeeper.utils.playwright_utils import PlaywrightUtils
 
 class AuthAgent:
-    __BASE_AUTH_URL: URL = URL("https://www.epicgames.com/account/personal")
-
     def __init__(self, page: Page) -> None:
         self.__page: Page = page
-
-    @classmethod
-    def get_auth_url(cls) -> URL:
-        lang: str = config.EPIC_GAMES_LOCALE
-        return cls.__BASE_AUTH_URL.with_query(
-            {
-                "lang": lang
-            }
-        )
-
-    @classmethod
-    def get_invalidated_auth_url(cls) -> URL:
-        return cls.get_auth_url().update_query(
-            {
-                "productName": "egs",
-                "sessionInvalidated": "true"
-            }
-        )
 
     @retry(max_attempts=5, wait=10)
     async def login_if_needed(self, hcaptcha_agent: HCaptchaAgent, redirect_url: URL) -> None:
@@ -46,7 +27,7 @@ class AuthAgent:
     async def __handle_login_form(self, hcaptcha_agent: HCaptchaAgent) -> None:
         async with AuthEvents(self.__page) as events:
             logger.info("User not authenticated, attempting login")
-            await self.__page.goto(str(self.get_invalidated_auth_url()), wait_until="domcontentloaded")
+            await self.__page.goto(str(AuthUrlFactory.get_invalidated_auth_url()), wait_until="domcontentloaded")
 
             logger.info("Submitting login credentials")
             logger.info("Filling email field")
@@ -66,7 +47,7 @@ class AuthAgent:
 
     async def __handle_redirection(self, redirect_url: URL) -> None:
         logger.info("Redirecting to auth page")
-        await self.__page.goto(str(self.get_auth_url()), wait_until="domcontentloaded")
+        await self.__page.goto(str(AuthUrlFactory.get_auth_url()), wait_until="domcontentloaded")
 
         logger.info("Redirecting to target page: {}", redirect_url)
         await self.__page.goto(str(redirect_url), wait_until="domcontentloaded")
