@@ -7,11 +7,6 @@ class StoreUrlFactory:
     __BASE_STORE_PROMOTIONS_URL: URL = URL("https://store-site-backend-static-ipv4.ak.epicgames.com/freeGamesPromotions")
 
     @classmethod
-    def get_cart_success_url(cls) -> URL:
-        locale: str = config.EPIC_GAMES_LOCALE
-        return cls.__BASE_STORE_URL / locale / "cart" / "success"
-
-    @classmethod
     def get_store_url(cls) -> URL:
         locale: str = config.EPIC_GAMES_LOCALE
         return cls.__BASE_STORE_URL / locale

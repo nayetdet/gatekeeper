@@ -28,8 +28,9 @@ class ClaimService:
 
             async with HCaptchaAgent(page) as hcaptcha_agent:
                 auth_agent: AuthAgent = AuthAgent(page)
+                await auth_agent.login_if_needed(hcaptcha_agent)
+
                 claim_agent: ClaimAgent = ClaimAgent(page)
                 for index, url in enumerate(urls, start=1):
                     logger.info("Processing product {}/{}: {}", index, len(urls), url)
-                    await auth_agent.login_if_needed(hcaptcha_agent, redirect_url=url)
                     await claim_agent.claim_product(hcaptcha_agent, url=url)

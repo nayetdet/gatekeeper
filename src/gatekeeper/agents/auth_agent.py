@@ -7,22 +7,23 @@ from gatekeeper.config import config
 from gatekeeper.decorators.retry_decorator import retry
 from gatekeeper.events.auth_events import AuthEvents
 from gatekeeper.factories.auth_url_factory import AuthUrlFactory
+from gatekeeper.factories.store_url_factory import StoreUrlFactory
 from gatekeeper.utils.playwright_utils import PlaywrightUtils
 
 class AuthAgent:
     def __init__(self, page: Page) -> None:
         self.__page: Page = page
 
-    @retry(max_attempts=5, wait=10)
-    async def login_if_needed(self, hcaptcha_agent: HCaptchaAgent, redirect_url: URL) -> None:
-        logger.info("Ensuring authenticated session with Epic Games (redirect_url={})", redirect_url)
-        await self.__handle_redirection(redirect_url)
+    @retry(max_attempts=5, wait=5)
+    async def login_if_needed(self, hcaptcha_agent: HCaptchaAgent) -> None:
+        logger.info("Ensuring authenticated session with Epic Games")
+        await self.__handle_redirection()
         if await self.__is_logged_in():
             logger.info("Already logged in, skipping login")
             return
 
         await self.__handle_login_form(hcaptcha_agent)
-        await self.__handle_redirection(redirect_url)
+        await self.__handle_redirection()
 
     async def __handle_login_form(self, hcaptcha_agent: HCaptchaAgent) -> None:
         async with AuthEvents(self.__page) as events:
@@ -45,12 +46,13 @@ class AuthAgent:
             await asyncio.wait_for(events.login_success.wait(), timeout=60)
             logger.success("Login successful")
 
-    async def __handle_redirection(self, redirect_url: URL) -> None:
+    async def __handle_redirection(self) -> None:
         logger.info("Redirecting to auth page")
         await self.__page.goto(str(AuthUrlFactory.get_auth_url()), wait_until="domcontentloaded")
 
-        logger.info("Redirecting to target page: {}", redirect_url)
-        await self.__page.goto(str(redirect_url), wait_until="domcontentloaded")
+        store_url: URL = StoreUrlFactory.get_store_url()
+        logger.info("Redirecting to store: {}", store_url)
+        await self.__page.goto(str(store_url), wait_until="domcontentloaded")
 
     async def __is_logged_in(self) -> bool:
         return await self.__page.locator("//egs-navigation").get_attribute("isloggedin") == "true"

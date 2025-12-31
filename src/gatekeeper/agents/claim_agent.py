@@ -1,18 +1,17 @@
 from loguru import logger
-from playwright.async_api import Page, Locator, FrameLocator
+from playwright.async_api import Page, Locator, FrameLocator, expect
 from yarl import URL
 from gatekeeper.agents.hcaptcha_agent import HCaptchaAgent
 from gatekeeper.decorators.retry_decorator import retry
 from gatekeeper.models.product import Product
 from gatekeeper.repositories.product_repository import ProductRepository
 from gatekeeper.utils.playwright_utils import PlaywrightUtils
-from gatekeeper.factories.store_url_factory import StoreUrlFactory
 
 class ClaimAgent:
     def __init__(self, page: Page) -> None:
         self.__page: Page = page
 
-    @retry(max_attempts=5, wait=10)
+    @retry(max_attempts=5, wait=5)
     async def claim_product(self, hcaptcha_agent: HCaptchaAgent, url: URL) -> None:
         logger.info("Starting product claim: {}", url)
         await self.__page.goto(str(url), wait_until="domcontentloaded")
@@ -32,19 +31,20 @@ class ClaimAgent:
         await PlaywrightUtils.click(purchase_button)
 
         logger.info("Clicking payment confirmation button")
-        iframe: FrameLocator = self.__page.frame_locator("//iframe[@class='']")
-        payment_button: Locator = iframe.locator("//button[contains(@class, 'payment-btn')]")
+        payment_iframe: FrameLocator = self.__page.frame_locator("//iframe[@class='']")
+        payment_button: Locator = payment_iframe.locator("//button[contains(@class, 'payment-btn')]")
         await PlaywrightUtils.click(payment_button)
 
         logger.info("Waiting for captcha challenge if present")
         await hcaptcha_agent.wait_for_challenge()
 
-        await self.__page.wait_for_url(str(StoreUrlFactory.get_cart_success_url()))
+        success_container: Locator = self.__page.locator("//div[@data-testid='checkout-success-title']")
+        await expect(success_container).to_be_visible()
         logger.success("Purchase successfully completed")
 
     @staticmethod
     async def __is_already_claimed(purchase_button: Locator) -> bool:
         action_container: Locator = purchase_button.locator("../../div//button")
-        action_container_buttons_count: int = await PlaywrightUtils.count(action_container)
-        logger.info("Action buttons detected: {}", action_container_buttons_count)
-        return action_container_buttons_count == 1
+        action_container_button_count: int = await PlaywrightUtils.count(action_container)
+        logger.info("Action buttons detected: {}", action_container_button_count)
+        return action_container_button_count == 1
