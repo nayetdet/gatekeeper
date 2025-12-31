@@ -59,6 +59,7 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
           docker run --rm \
+            --user "$(id -u):$(id -g)" \
             -e TZ \
             -e EPIC_GAMES_EMAIL \
             -e EPIC_GAMES_PASSWORD \
