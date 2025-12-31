@@ -2,10 +2,14 @@ import asyncio
 from datetime import datetime, timezone
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
+from loguru import logger
 from gatekeeper.config import config
+from gatekeeper.database import engine
 from gatekeeper.jobs.claim_job import ClaimJob
+from gatekeeper.logger import setup_logger
 
 async def main() -> None:
+    setup_logger()
     if not config.EPIC_GAMES_CRONTAB:
         await ClaimJob.run()
         return
@@ -27,4 +31,7 @@ async def main() -> None:
         scheduler.shutdown(wait=False)
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try: asyncio.run(main())
+    finally:
+        logger.complete()
+        asyncio.run(engine.dispose())

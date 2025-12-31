@@ -25,12 +25,14 @@ class Config(AgentConfig):
     DATA_PATH: Path = ROOT_PATH / "data"
     BROWSER_PROFILE_PATH: Path = DATA_PATH / "browser_profile"
     HCAPTCHA_PATH: Path = DATA_PATH / "hcaptcha"
+    LOGS_PATH: Path = DATA_PATH / "logs"
     RECORDS_PATH: Path = DATA_PATH / "records"
 
     cache_dir: Path = HCAPTCHA_PATH / ".cache"
     challenge_dir: Path = HCAPTCHA_PATH / ".challenge"
     captcha_response_dir: Path = HCAPTCHA_PATH / ".captcha"
 
+    @classmethod
     @field_validator(
         "EPIC_GAMES_EMAIL",
         "EPIC_GAMES_PASSWORD",
@@ -38,7 +40,6 @@ class Config(AgentConfig):
         "EPIC_GAMES_COUNTRY",
         mode="before"
     )
-    @classmethod
     def validate_required_envs(cls, value: Any, info: FieldValidationInfo) -> str:
         if not isinstance(value, str) or not value.strip():
             raise ValueError(f"Required environment variable is missing or empty: {info.field_name}")
