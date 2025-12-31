@@ -1,8 +1,11 @@
 [project]
 name = "gatekeeper"
-version = "1.0.3"
-description = ""
+version = "1.0.4"
+description = "Projeto que automatiza o resgate de jogos gratuitos da Epic Games, rodando periodicamente para que você não precise fazer isso manualmente toda semana."
 readme = "README.md"
+authors = [
+    { name = "nayetdet", email = "jpmoreiracampos21@gmail.com" }
+]
 requires-python = ">=3.13"
 dependencies = [
     "aiohttp>=3.13.0",
