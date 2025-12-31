@@ -29,5 +29,5 @@ jobs:
           context: .
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.repository }}:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.repository }}:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/gatekeeper:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/gatekeeper:${{ github.sha }}
