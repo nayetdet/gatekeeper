@@ -2,16 +2,20 @@ import os
 from pathlib import Path
 from typing import Any, Optional
 from hcaptcha_challenger import AgentConfig, FastShotModelType, SCoTModelType
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, SecretStr
 from pydantic_core.core_schema import FieldValidationInfo
 
 class Config(AgentConfig):
+    # General
+    SCREEN_WIDTH: int = 1366
+    SCREEN_HEIGHT: int = 768
+    CRONTAB: Optional[str] = Field(default_factory=lambda: os.getenv("CRONTAB"))
+
     # Epic Games
-    EPIC_GAMES_EMAIL: str = Field(default_factory=lambda: os.getenv("EPIC_GAMES_EMAIL"))
-    EPIC_GAMES_PASSWORD: str = Field(default_factory=lambda: os.getenv("EPIC_GAMES_PASSWORD"))
+    EPIC_GAMES_EMAIL: SecretStr = Field(default_factory=lambda: os.getenv("EPIC_GAMES_EMAIL"))
+    EPIC_GAMES_PASSWORD: SecretStr = Field(default_factory=lambda: os.getenv("EPIC_GAMES_PASSWORD"))
     EPIC_GAMES_LOCALE: str = Field(default_factory=lambda: os.getenv("EPIC_GAMES_LOCALE"))
     EPIC_GAMES_COUNTRY: str = Field(default_factory=lambda: os.getenv("EPIC_GAMES_COUNTRY"))
-    EPIC_GAMES_CRONTAB: Optional[str] = Field(default_factory=lambda: os.getenv("EPIC_GAMES_CRONTAB"))
 
     # Models
     MODEL: str = "gemini-2.5-flash"

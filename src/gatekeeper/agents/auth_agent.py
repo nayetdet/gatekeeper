@@ -32,11 +32,11 @@ class AuthAgent:
 
             logger.info("Submitting login credentials")
             logger.info("Filling email field")
-            await PlaywrightUtils.type(self.__page.locator("#email"), value=config.EPIC_GAMES_EMAIL)
+            await PlaywrightUtils.type(self.__page.locator("#email"), value=config.EPIC_GAMES_EMAIL.get_secret_value())
             await PlaywrightUtils.click(self.__page.locator("#continue"))
 
             logger.info("Filling password field")
-            await PlaywrightUtils.type(self.__page.locator("#password"), value=config.EPIC_GAMES_PASSWORD)
+            await PlaywrightUtils.type(self.__page.locator("#password"), value=config.EPIC_GAMES_PASSWORD.get_secret_value())
             await PlaywrightUtils.click(self.__page.locator("#sign-in"))
 
             logger.info("Waiting for captcha challenge if present")

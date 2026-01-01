@@ -6,12 +6,11 @@ services:
     image: ghcr.io/nayetdet/gatekeeper:latest
     container_name: gatekeeper
     environment:
-      TZ: ${TZ}
+      CRONTAB: ${CRONTAB}
       EPIC_GAMES_EMAIL: ${EPIC_GAMES_EMAIL}
       EPIC_GAMES_PASSWORD: ${EPIC_GAMES_PASSWORD}
       EPIC_GAMES_LOCALE: ${EPIC_GAMES_LOCALE}
       EPIC_GAMES_COUNTRY: ${EPIC_GAMES_COUNTRY}
-      EPIC_GAMES_CRONTAB: ${EPIC_GAMES_CRONTAB}
       GEMINI_API_KEY: ${GEMINI_API_KEY}
     volumes:
       - gatekeeper_data:/app/data

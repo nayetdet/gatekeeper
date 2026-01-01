@@ -1,6 +1,6 @@
 [project]
 name = "gatekeeper"
-version = "1.0.4"
+version = "1.1.0"
 description = "Projeto que automatiza o resgate de jogos gratuitos da Epic Games, rodando periodicamente para que você não precise fazer isso manualmente toda semana."
 readme = "README.md"
 license = "GPL-3.0-or-later"
@@ -17,6 +17,7 @@ dependencies = [
     "hcaptcha-challenger>=0.19.0",
     "loguru>=0.7.3",
     "playwright>=1.55.0",
+    "pydantic>=2.12.5",
     "python-dotenv>=1.2.1",
     "sqlmodel>=0.0.31",
     "tenacity>=9.1.2",

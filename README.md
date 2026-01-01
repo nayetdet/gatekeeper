@@ -17,7 +17,6 @@ O workflow verifica automaticamente se o repositório é privado.
 2. Copie o arquivo `.github/workflows/gatekeeper.yml` para esse repositório.
 3. Configure as secrets em **Settings → Secrets and variables → Actions**:
 
-   - `TZ`
    - `EPIC_GAMES_EMAIL`
    - `EPIC_GAMES_PASSWORD`
    - `EPIC_GAMES_LOCALE`

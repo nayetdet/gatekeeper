@@ -3,8 +3,6 @@ from playwright.async_api import Page, Locator, FrameLocator, expect
 from yarl import URL
 from gatekeeper.agents.hcaptcha_agent import HCaptchaAgent
 from gatekeeper.decorators.retry_decorator import retry
-from gatekeeper.models.product import Product
-from gatekeeper.repositories.product_repository import ProductRepository
 from gatekeeper.utils.playwright_utils import PlaywrightUtils
 
 class ClaimAgent:
@@ -16,9 +14,6 @@ class ClaimAgent:
         logger.info("Starting product claim: {}", url)
         await self.__page.goto(str(url), wait_until="domcontentloaded")
         await self.__handle_purchase(hcaptcha_agent)
-
-        logger.success("Product claim completed, saving to database (url={})", url)
-        await ProductRepository.create(Product(url=str(url)))
 
     async def __handle_purchase(self, hcaptcha_agent: HCaptchaAgent) -> None:
         logger.info("Attempting purchase")
@@ -47,4 +42,6 @@ class ClaimAgent:
         action_container: Locator = purchase_button.locator("../../div//button")
         action_container_button_count: int = await PlaywrightUtils.count(action_container)
         logger.info("Action buttons detected: {}", action_container_button_count)
+        if not action_container_button_count:
+            raise RuntimeError("No action buttons found, page layout may have changed or page not fully loaded")
         return action_container_button_count == 1

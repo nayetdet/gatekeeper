@@ -51,7 +51,6 @@ jobs:
 
       - name: Run Gatekeeper
         env:
-          TZ: ${{ secrets.TZ }}
           EPIC_GAMES_EMAIL: ${{ secrets.EPIC_GAMES_EMAIL }}
           EPIC_GAMES_PASSWORD: ${{ secrets.EPIC_GAMES_PASSWORD }}
           EPIC_GAMES_LOCALE: ${{ secrets.EPIC_GAMES_LOCALE }}
@@ -59,7 +58,6 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
           docker run --rm \
-            -e TZ \
             -e EPIC_GAMES_EMAIL \
             -e EPIC_GAMES_PASSWORD \
             -e EPIC_GAMES_LOCALE \

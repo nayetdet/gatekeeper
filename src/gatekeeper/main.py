@@ -8,16 +8,14 @@ from gatekeeper.database import engine
 from gatekeeper.jobs.claim_job import ClaimJob
 from gatekeeper.logger import setup_logger
 
-async def main() -> None:
-    setup_logger()
-    if not config.EPIC_GAMES_CRONTAB:
-        await ClaimJob.run()
-        return
+async def run_once() -> None:
+    await ClaimJob.run()
 
+async def run_scheduler() -> None:
     scheduler: AsyncIOScheduler = AsyncIOScheduler(timezone=timezone.utc)
     scheduler.add_job(
         ClaimJob.run,
-        trigger=CronTrigger.from_crontab(config.EPIC_GAMES_CRONTAB),
+        trigger=CronTrigger.from_crontab(config.CRONTAB),
         id=ClaimJob.identifier(),
         replace_existing=True,
         max_instances=1,
@@ -30,8 +28,12 @@ async def main() -> None:
     finally:
         scheduler.shutdown(wait=False)
 
-if __name__ == "__main__":
-    try: asyncio.run(main())
+async def main() -> None:
+    setup_logger()
+    try: await (run_once if not config.CRONTAB else run_scheduler)()
     finally:
-        logger.complete()
-        asyncio.run(engine.dispose())
+        await engine.dispose()
+        await logger.complete()
+
+if __name__ == "__main__":
+    asyncio.run(main())
