@@ -1,6 +1,6 @@
 [project]
 name = "gatekeeper"
-version = "1.1.2"
+version = "1.1.3"
 description = "Projeto que automatiza o resgate de jogos gratuitos da Epic Games, rodando periodicamente para que você não precise fazer isso manualmente toda semana."
 readme = "README.md"
 license = "GPL-3.0-or-later"

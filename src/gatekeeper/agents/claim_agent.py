@@ -1,8 +1,10 @@
+import asyncio
 from loguru import logger
-from playwright.async_api import Page, Locator, FrameLocator, expect
+from playwright.async_api import Page, Locator, FrameLocator
 from yarl import URL
 from gatekeeper.agents.hcaptcha_agent import HCaptchaAgent
 from gatekeeper.decorators.retry_decorator import retry
+from gatekeeper.events.claim_events import ClaimEvents
 from gatekeeper.utils.playwright_utils import PlaywrightUtils
 
 class ClaimAgent:
@@ -22,20 +24,21 @@ class ClaimAgent:
             logger.warning("Product already owned or unavailable, purchase skipped")
             return
 
-        logger.info("Purchase available, clicking purchase button")
-        await PlaywrightUtils.click(purchase_button)
+        async with ClaimEvents(self.__page) as events:
+            logger.info("Purchase available, clicking purchase button")
+            await PlaywrightUtils.click(purchase_button, mode="trial")
 
-        logger.info("Clicking payment confirmation button")
-        payment_iframe: FrameLocator = self.__page.frame_locator("//iframe[@class='']")
-        payment_button: Locator = payment_iframe.locator("//button[contains(@class, 'payment-btn')]")
-        await PlaywrightUtils.click(payment_button)
+            logger.info("Clicking payment confirmation button")
+            payment_iframe: FrameLocator = self.__page.frame_locator("//iframe[@class='']")
+            payment_button: Locator = payment_iframe.locator("//button[contains(@class, 'payment-btn')]")
+            await PlaywrightUtils.click(payment_button, mode="trial")
 
-        logger.info("Waiting for captcha challenge if present")
-        await hcaptcha_agent.wait_for_challenge()
+            logger.info("Waiting for captcha challenge if present")
+            await hcaptcha_agent.wait_for_challenge()
 
-        success_container: Locator = self.__page.locator("//div[@data-testid='checkout-success-title']")
-        await expect(success_container).to_be_visible()
-        logger.success("Purchase successfully completed")
+            logger.info("Waiting for purchase success event")
+            await asyncio.wait_for(events.purchase_success.wait(), timeout=30)
+            logger.success("Purchase successfully completed")
 
     @staticmethod
     async def __is_already_claimed(purchase_button: Locator) -> bool:

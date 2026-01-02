@@ -20,7 +20,7 @@ jobs:
       cancel-in-progress: false
 
     steps:
-      - name: Check repository visibility
+      - name: Validate repository visibility
         run: |
           if [[ "${{ github.event.repository.private }}" != "true" ]]; then
             echo "This workflow must be run in a private repository"
@@ -33,22 +33,30 @@ jobs:
           fetch-depth: 1
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Switch to state branch
+      - name: Set up Git identity
         run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Set up state branch
+        run: |
           git fetch origin --prune
           if git ls-remote --exit-code --heads origin "$BRANCH_NAME" >/dev/null 2>&1; then
-            git checkout -B "$BRANCH_NAME" "origin/$BRANCH_NAME"
+            git checkout "$BRANCH_NAME"
           else
-            git checkout -b "$BRANCH_NAME"
+            git checkout --orphan "$BRANCH_NAME"
+            git rm -rf .
+            mkdir -p data
+            touch data/.gitkeep
+            git add data/.gitkeep
+            git commit -m "chore: initialize state branch"
             git push -u origin "$BRANCH_NAME"
           fi
 
-      - name: Pull image
+      - name: Pull container image
         run: docker pull ${{ env.IMAGE }}
 
-      - name: Run Gatekeeper
+      - name: Run Gatekeeper container
         env:
           EPIC_GAMES_EMAIL: ${{ secrets.EPIC_GAMES_EMAIL }}
           EPIC_GAMES_PASSWORD: ${{ secrets.EPIC_GAMES_PASSWORD }}
@@ -78,9 +86,8 @@ jobs:
       - name: Persist data volume to state branch
         if: always()
         run: |
-          git status
           git add data
           if ! git diff --cached --quiet; then
-            git commit -m "chore: persist gatekeeper run $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
-            git push origin "$BRANCH_NAME"
+            git commit --amend -m "state: persist gatekeeper run $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+            git push --force-with-lease origin "$BRANCH_NAME"
           fi

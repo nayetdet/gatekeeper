@@ -1,12 +1,12 @@
 from asyncio import Event
 from contextlib import suppress
-from typing import Self, Dict, Any
+from typing import Self
 from playwright.async_api import Page, Response
 
-class AuthEvents:
+class ClaimEvents:
     def __init__(self, page: Page) -> None:
         self.__page: Page = page
-        self.__login_success: Event = Event()
+        self.__purchase_success: Event = Event()
 
     async def __aenter__(self) -> Self:
         self.__page.on("response", self.__on_response)
@@ -17,14 +17,13 @@ class AuthEvents:
             self.__page.remove_listener("response", self.__on_response)
 
     @property
-    def login_success(self) -> Event:
-        return self.__login_success
+    def purchase_success(self) -> Event:
+        return self.__purchase_success
 
     async def __on_response(self, response: Response) -> None:
         if response.request.method != "POST" or "talon" in response.url:
             return
 
         with suppress(Exception):
-            result: Dict[str, Any] = await response.json()
-            if "/id/api/analytics" in response.url and result.get("accountId"):
-                self.__login_success.set()
+            if "/v2/purchase/confirm-order" in response.url:
+                self.__purchase_success.set()
