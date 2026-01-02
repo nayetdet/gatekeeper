@@ -9,7 +9,7 @@ class ClaimAgent:
     def __init__(self, page: Page) -> None:
         self.__page: Page = page
 
-    @retry(max_attempts=5, wait=5)
+    @retry(max_attempts=3, wait=5)
     async def claim_product(self, hcaptcha_agent: HCaptchaAgent, url: URL) -> None:
         logger.info("Starting product claim: {}", url)
         await self.__page.goto(str(url), wait_until="domcontentloaded")

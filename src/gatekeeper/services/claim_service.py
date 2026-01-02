@@ -6,7 +6,6 @@ from gatekeeper.agents.auth_agent import AuthAgent
 from gatekeeper.agents.hcaptcha_agent import HCaptchaAgent
 from gatekeeper.agents.claim_agent import ClaimAgent
 from gatekeeper.agents.discovery_agent import DiscoveryAgent
-from gatekeeper.decorators.retry_decorator import retry
 from gatekeeper.factories.browser.browser_factory import BrowserFactory
 from gatekeeper.mappers.product_mapper import ProductMapper
 from gatekeeper.repositories.product_repository import ProductRepository
@@ -15,7 +14,6 @@ from gatekeeper.services.discovery_service import DiscoveryService
 
 class ClaimService:
     @classmethod
-    @retry(max_attempts=3, wait=5)
     async def claim_products(cls) -> None:
         products: List[ProductSchema] = await DiscoveryService.get_unclaimed_free_products()
         if not products:

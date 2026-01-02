@@ -26,15 +26,12 @@ RUN apt-get update  \
         libgl1 \
         libglib2.0-0 \
         libgtk-3-0 \
-        libx11-xcb1 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /app /app
+COPY --chmod=755 docker/uv/scripts/entrypoint.sh /app/entrypoint.sh
 RUN camoufox fetch
-
-COPY docker/uv/scripts/entrypoint.sh /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh
 
 WORKDIR /app
 VOLUME ["/app/data"]

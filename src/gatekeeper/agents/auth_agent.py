@@ -14,7 +14,7 @@ class AuthAgent:
     def __init__(self, page: Page) -> None:
         self.__page: Page = page
 
-    @retry(max_attempts=5, wait=5)
+    @retry(max_attempts=3, wait=5)
     async def login_if_needed(self, hcaptcha_agent: HCaptchaAgent) -> None:
         logger.info("Ensuring authenticated session with Epic Games")
         await self.__handle_redirection()

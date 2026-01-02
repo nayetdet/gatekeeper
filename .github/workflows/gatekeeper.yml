@@ -56,7 +56,11 @@ jobs:
           EPIC_GAMES_COUNTRY: ${{ secrets.EPIC_GAMES_COUNTRY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
-          docker run --rm \
+          docker run \
+            --init \
+            --rm \
+            --memory=4g \
+            --shm-size=2g \
             -e EPIC_GAMES_EMAIL \
             -e EPIC_GAMES_PASSWORD \
             -e EPIC_GAMES_LOCALE \

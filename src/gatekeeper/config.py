@@ -7,8 +7,8 @@ from pydantic_core.core_schema import FieldValidationInfo
 
 class Config(AgentConfig):
     # General
-    SCREEN_WIDTH: int = 1366
-    SCREEN_HEIGHT: int = 768
+    SCREEN_WIDTH: int = Field(default=1280)
+    SCREEN_HEIGHT: int = Field(default=720)
     CRONTAB: Optional[str] = Field(default_factory=lambda: os.getenv("CRONTAB"))
 
     # Epic Games

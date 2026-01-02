@@ -1,10 +1,13 @@
 services:
   gatekeeper:
-#    build:
-#      context: .
-#      dockerfile: ./docker/uv/Dockerfile
-    image: ghcr.io/nayetdet/gatekeeper:latest
+    build:
+      context: .
+      dockerfile: ./docker/uv/Dockerfile
+#    image: ghcr.io/nayetdet/gatekeeper:latest
     container_name: gatekeeper
+    init: true
+    mem_limit: 4g
+    shm_size: 2g
     environment:
       CRONTAB: ${CRONTAB}
       EPIC_GAMES_EMAIL: ${EPIC_GAMES_EMAIL}

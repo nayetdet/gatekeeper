@@ -21,5 +21,5 @@ class PlaywrightUtils:
         await expect(locator).to_be_visible()
         await expect(locator).to_be_enabled()
         await locator.scroll_into_view_if_needed()
-        await locator.click(trial=True)
-        await locator.click(timeout=5000)
+        await locator.hover()
+        await locator.click()
