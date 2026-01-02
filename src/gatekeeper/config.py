@@ -27,6 +27,8 @@ class Config(AgentConfig):
     # Paths
     ROOT_PATH: Path = Path(__file__).resolve().parents[2]
     DATA_PATH: Path = ROOT_PATH / "data"
+
+    DATABASE_PATH: Path = DATA_PATH / "database.sqlite"
     BROWSER_PROFILE_PATH: Path = DATA_PATH / "browser_profile"
     HCAPTCHA_PATH: Path = DATA_PATH / "hcaptcha"
     LOGS_PATH: Path = DATA_PATH / "logs"

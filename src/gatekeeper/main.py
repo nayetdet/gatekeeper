@@ -9,9 +9,11 @@ from gatekeeper.jobs.claim_job import ClaimJob
 from gatekeeper.logger import setup_logger
 
 async def run_once() -> None:
+    logger.info("Running app in single-run mode")
     await ClaimJob.run()
 
 async def run_scheduler() -> None:
+    logger.info("Running app in scheduler mode (cron='{}')", config.CRONTAB)
     scheduler: AsyncIOScheduler = AsyncIOScheduler(timezone=timezone.utc)
     scheduler.add_job(
         ClaimJob.run,

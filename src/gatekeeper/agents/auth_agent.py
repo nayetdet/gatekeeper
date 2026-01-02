@@ -6,8 +6,8 @@ from gatekeeper.agents.hcaptcha_agent import HCaptchaAgent
 from gatekeeper.config import config
 from gatekeeper.decorators.retry_decorator import retry
 from gatekeeper.events.auth_events import AuthEvents
-from gatekeeper.factories.auth_url_factory import AuthUrlFactory
-from gatekeeper.factories.store_url_factory import StoreUrlFactory
+from gatekeeper.factories.urls.auth_url_factory import AuthUrlFactory
+from gatekeeper.factories.urls.store_url_factory import StoreUrlFactory
 from gatekeeper.utils.playwright_utils import PlaywrightUtils
 
 class AuthAgent:
@@ -28,7 +28,7 @@ class AuthAgent:
     async def __handle_login_form(self, hcaptcha_agent: HCaptchaAgent) -> None:
         async with AuthEvents(self.__page) as events:
             logger.info("User not authenticated, attempting login")
-            await self.__page.goto(str(AuthUrlFactory.get_invalidated_auth_url()), wait_until="domcontentloaded")
+            await self.__page.goto(str(AuthUrlFactory.build_invalidated_auth_url()), wait_until="domcontentloaded")
 
             logger.info("Submitting login credentials")
             logger.info("Filling email field")
@@ -48,9 +48,9 @@ class AuthAgent:
 
     async def __handle_redirection(self) -> None:
         logger.info("Redirecting to auth page")
-        await self.__page.goto(str(AuthUrlFactory.get_auth_url()), wait_until="domcontentloaded")
+        await self.__page.goto(str(AuthUrlFactory.build_auth_url()), wait_until="domcontentloaded")
 
-        store_url: URL = StoreUrlFactory.get_store_url()
+        store_url: URL = StoreUrlFactory.build_store_url()
         logger.info("Redirecting to store: {}", store_url)
         await self.__page.goto(str(store_url), wait_until="domcontentloaded")
 
