@@ -4,7 +4,7 @@ install:
 	uv sync --all-groups --all-packages
 
 run: migrations
-	uv run python -m src.gatekeeper.main
+	uv run python -m gatekeeper
 
 migrations:
 	mkdir -p data

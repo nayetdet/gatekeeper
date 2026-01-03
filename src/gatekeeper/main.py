@@ -30,9 +30,14 @@ async def run_scheduler() -> None:
     finally:
         scheduler.shutdown(wait=False)
 
+async def run() -> None:
+    if not config.CRONTAB:
+        await run_once()
+    else: await run_scheduler()
+
 async def main() -> None:
     setup_logger()
-    try: await (run_once if not config.CRONTAB else run_scheduler)()
+    try: await run()
     finally:
         await engine.dispose()
         await logger.complete()

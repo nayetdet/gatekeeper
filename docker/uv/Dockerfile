@@ -36,4 +36,4 @@ RUN camoufox fetch
 WORKDIR /app
 VOLUME ["/app/data"]
 ENTRYPOINT ["/app/entrypoint.sh"]
-CMD ["python", "-m", "src.gatekeeper.main"]
+CMD ["python", "-m", "gatekeeper"]
