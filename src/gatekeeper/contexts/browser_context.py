@@ -1,14 +1,17 @@
 from contextlib import asynccontextmanager
-from typing import Union, AsyncIterator
+from datetime import datetime
+from pathlib import Path
+from typing import AsyncIterator
 from browserforge.fingerprints import Screen
 from camoufox import AsyncCamoufox
-from playwright.async_api import ViewportSize, Browser, BrowserContext
+from loguru import logger
+from playwright.async_api import ViewportSize, Page
 from gatekeeper.config import config
 
-class BrowserFactory:
+class BrowserContext:
     @staticmethod
     @asynccontextmanager
-    async def build_browser() -> AsyncIterator[Union[Browser, BrowserContext]]:
+    async def get_page() -> AsyncIterator[Page]:
         async with AsyncCamoufox(
             persistent_context=True,
             user_data_dir=config.BROWSER_PROFILE_PATH,
@@ -26,4 +29,9 @@ class BrowserFactory:
             headless=True,
             humanize=1
         ) as browser:
-            yield browser
+            page: Page = browser.pages[0] if browser.pages else await browser.new_page()
+            try: yield page
+            finally:
+                video_path: Path = Path(await page.video.path())
+                video_path = video_path.rename(config.RECORDS_PATH / f"{datetime.now():%Y%m%dT%H%M%S}.webm")
+                logger.info("Browser session recording saved at {}", video_path.relative_to(Path.cwd()))

@@ -3,7 +3,7 @@ from contextlib import suppress
 from typing import List, Dict, Any, Optional
 from loguru import logger
 from gatekeeper.decorators.retry_decorator import retry
-from gatekeeper.factories.urls.store_url_factory import StoreUrlFactory
+from gatekeeper.factories.store_url_factory import StoreUrlFactory
 from gatekeeper.mappers.product_mapper import ProductMapper
 from gatekeeper.models import Product
 from gatekeeper.repositories.product_repository import ProductRepository
@@ -17,7 +17,7 @@ class DiscoveryService:
         logger.info("Fetching free products from Epic Games promotions API")
         async with aiohttp.ClientSession() as session:
             async with session.get(
-                url=StoreUrlFactory.build_store_promotions_url(),
+                url=StoreUrlFactory.get_store_promotions_url(),
                 timeout=aiohttp.ClientTimeout(total=15)
             ) as response:
                 response.raise_for_status()

@@ -5,7 +5,7 @@ class AuthUrlFactory:
     __BASE_AUTH_URL: URL = URL("https://www.epicgames.com/account/personal")
 
     @classmethod
-    def build_auth_url(cls) -> URL:
+    def get_auth_url(cls) -> URL:
         lang: str = config.EPIC_GAMES_LOCALE
         return cls.__BASE_AUTH_URL.with_query(
             {
@@ -14,8 +14,8 @@ class AuthUrlFactory:
         )
 
     @classmethod
-    def build_invalidated_auth_url(cls) -> URL:
-        return cls.build_auth_url().update_query(
+    def get_invalidated_auth_url(cls) -> URL:
+        return cls.get_auth_url().update_query(
             {
                 "productName": "egs",
                 "sessionInvalidated": "true"

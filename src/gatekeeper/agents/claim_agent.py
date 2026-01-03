@@ -1,8 +1,8 @@
 import asyncio
+from hcaptcha_challenger import AgentV
 from loguru import logger
 from playwright.async_api import Page, Locator, FrameLocator
 from yarl import URL
-from gatekeeper.agents.hcaptcha_agent import HCaptchaAgent
 from gatekeeper.decorators.retry_decorator import retry
 from gatekeeper.events.claim_events import ClaimEvents
 from gatekeeper.utils.playwright_utils import PlaywrightUtils
@@ -12,12 +12,12 @@ class ClaimAgent:
         self.__page: Page = page
 
     @retry(max_attempts=3, wait=5)
-    async def claim_product(self, hcaptcha_agent: HCaptchaAgent, url: URL) -> None:
+    async def claim_product(self, hcaptcha_challenger: AgentV, url: URL) -> None:
         logger.info("Starting product claim: {}", url)
         await self.__page.goto(str(url), wait_until="domcontentloaded")
-        await self.__handle_purchase(hcaptcha_agent)
+        await self.__handle_purchase(hcaptcha_challenger)
 
-    async def __handle_purchase(self, hcaptcha_agent: HCaptchaAgent) -> None:
+    async def __handle_purchase(self, hcaptcha_challenger: AgentV) -> None:
         logger.info("Attempting purchase")
         purchase_button: Locator = self.__page.locator("//button[@data-testid='purchase-cta-button']").first
         if await self.__is_already_claimed(purchase_button):
@@ -34,7 +34,7 @@ class ClaimAgent:
             await PlaywrightUtils.click(payment_button, mode="trial")
 
             logger.info("Waiting for captcha challenge if present")
-            await hcaptcha_agent.wait_for_challenge()
+            await hcaptcha_challenger.wait_for_challenge()
 
             logger.info("Waiting for purchase success event")
             await asyncio.wait_for(events.purchase_success.wait(), timeout=30)
