@@ -1,9 +1,9 @@
 services:
   gatekeeper:
-    build:
-      context: .
-      dockerfile: ./docker/uv/Dockerfile
-#    image: ghcr.io/nayetdet/gatekeeper:latest
+#    build:
+#      context: .
+#      dockerfile: ./docker/uv/Dockerfile
+    image: ghcr.io/nayetdet/gatekeeper:latest
     container_name: gatekeeper
     init: true
     mem_limit: 4g
