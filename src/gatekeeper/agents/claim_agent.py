@@ -1,4 +1,5 @@
 import asyncio
+from contextlib import suppress
 from hcaptcha_challenger import AgentV
 from loguru import logger
 from playwright.async_api import Page, Locator, FrameLocator
@@ -26,15 +27,16 @@ class ClaimAgent:
 
         async with ClaimEvents(self.__page) as events:
             logger.info("Purchase available, clicking purchase button")
-            await PlaywrightUtils.click(purchase_button, mode="trial")
+            await PlaywrightUtils.click(purchase_button, trial=True)
 
             logger.info("Clicking payment confirmation button")
             payment_iframe: FrameLocator = self.__page.frame_locator("//iframe[@class='']")
             payment_button: Locator = payment_iframe.locator("//button[contains(@class, 'payment-btn')]")
-            await PlaywrightUtils.click(payment_button, mode="trial")
+            await PlaywrightUtils.click(payment_button, trial=True)
 
-            logger.info("Waiting for captcha challenge if present")
-            await hcaptcha_challenger.wait_for_challenge()
+            with suppress(Exception):
+                logger.info("Waiting for captcha challenge if present")
+                await hcaptcha_challenger.wait_for_challenge()
 
             logger.info("Waiting for purchase success event")
             await asyncio.wait_for(events.purchase_success.wait(), timeout=30)

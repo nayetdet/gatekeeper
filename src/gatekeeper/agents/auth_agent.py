@@ -1,4 +1,5 @@
 import asyncio
+from contextlib import suppress
 from hcaptcha_challenger import AgentV
 from loguru import logger
 from playwright.async_api import Page
@@ -33,14 +34,15 @@ class AuthAgent:
             logger.info("Submitting login credentials")
             logger.info("Filling email field")
             await PlaywrightUtils.type(self.__page.locator("#email"), value=config.EPIC_GAMES_EMAIL.get_secret_value())
-            await PlaywrightUtils.click(self.__page.locator("#continue"), mode="hover")
+            await PlaywrightUtils.click(self.__page.locator("#continue"))
 
             logger.info("Filling password field")
             await PlaywrightUtils.type(self.__page.locator("#password"), value=config.EPIC_GAMES_PASSWORD.get_secret_value())
-            await PlaywrightUtils.click(self.__page.locator("#sign-in"), mode="hover")
+            await PlaywrightUtils.click(self.__page.locator("#sign-in"))
 
-            logger.info("Waiting for captcha challenge if present")
-            await hcaptcha_challenger.wait_for_challenge()
+            with suppress(Exception):
+                logger.info("Waiting for captcha challenge if present")
+                await hcaptcha_challenger.wait_for_challenge()
 
             logger.info("Waiting for login success event")
             await asyncio.wait_for(events.login_success.wait(), timeout=30)

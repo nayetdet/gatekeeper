@@ -1,5 +1,4 @@
-from typing import Literal
-from playwright.async_api import Locator, expect
+from playwright.async_api import Locator
 from gatekeeper.decorators.retry_decorator import retry
 
 class PlaywrightUtils:
@@ -11,18 +10,16 @@ class PlaywrightUtils:
     @staticmethod
     @retry(max_attempts=3, wait=5)
     async def type(locator: Locator, value: str) -> None:
-        await expect(locator).to_be_visible()
-        await expect(locator).to_be_editable()
+        await locator.wait_for(state="attached")
+        await locator.scroll_into_view_if_needed()
         await locator.clear()
         await locator.type(value)
 
     @staticmethod
     @retry(max_attempts=3, wait=5)
-    async def click(locator: Locator, mode: Literal["hover", "trial"]) -> None:
-        await expect(locator).to_be_visible()
-        await expect(locator).to_be_enabled()
+    async def click(locator: Locator, trial: bool = False) -> None:
+        await locator.wait_for(state="attached")
         await locator.scroll_into_view_if_needed()
-        match mode:
-            case "hover": await locator.hover()
-            case "trial": await locator.click(trial=True)
+        if trial:
+            await locator.click(trial=True)
         await locator.click()
