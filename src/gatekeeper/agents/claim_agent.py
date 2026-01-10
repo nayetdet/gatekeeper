@@ -27,12 +27,12 @@ class ClaimAgent:
 
         async with ClaimEvents(self.__page) as events:
             logger.info("Purchase available, clicking purchase button")
-            await PlaywrightUtils.click(purchase_button, trial=True)
+            await PlaywrightUtils.click(purchase_button)
 
             logger.info("Clicking payment confirmation button")
             payment_iframe: FrameLocator = self.__page.frame_locator("//iframe[@class='']")
             payment_button: Locator = payment_iframe.locator("//button[contains(@class, 'payment-btn')]")
-            await PlaywrightUtils.click(payment_button, trial=True)
+            await PlaywrightUtils.click(payment_button)
 
             with suppress(Exception):
                 logger.info("Waiting for captcha challenge if present")

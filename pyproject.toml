@@ -1,6 +1,6 @@
 [project]
 name = "gatekeeper"
-version = "1.1.5"
+version = "1.1.6"
 description = "Projeto que automatiza o resgate de jogos gratuitos da Epic Games, rodando periodicamente para que você não precise fazer isso manualmente toda semana."
 readme = "README.md"
 license = "GPL-3.0-or-later"
@@ -11,7 +11,7 @@ requires-python = ">=3.13"
 dependencies = [
     "aiohttp>=3.13.3",
     "aiosqlite>=0.22.0",
-    "alembic>=1.17.2",
+    "alembic>=1.18.0",
     "apscheduler>=3.11.0",
     "camoufox>=0.4.11",
     "hcaptcha-challenger>=0.19.0",
