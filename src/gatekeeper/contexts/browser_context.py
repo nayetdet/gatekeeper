@@ -26,6 +26,8 @@ class BrowserContext:
                 max_height=config.SCREEN_HEIGHT
             ),
             headless=True,
-            humanize=1
+            humanize=True,
+            disable_coop=True,
+            i_know_what_im_doing=True
         ) as browser:
             yield browser.pages[0] if browser.pages else await browser.new_page()
