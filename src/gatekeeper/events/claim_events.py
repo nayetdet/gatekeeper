@@ -25,5 +25,5 @@ class ClaimEvents:
             return
 
         with suppress(Exception):
-            if "/v2/purchase/confirm-order" in response.url:
+            if "/v2/purchase/confirm-order" in response.url and response.ok:
                 self.__purchase_success.set()

@@ -50,11 +50,11 @@ class AuthAgent:
 
     async def __handle_redirection(self) -> None:
         logger.info("Redirecting to auth page")
-        await self.__page.goto(str(AuthUrlFactory.get_auth_url()), wait_until="domcontentloaded")
+        await self.__page.goto(str(AuthUrlFactory.get_auth_url()), wait_until="networkidle")
 
         store_url: URL = StoreUrlFactory.get_store_url()
         logger.info("Redirecting to store: {}", store_url)
-        await self.__page.goto(str(store_url), wait_until="domcontentloaded")
+        await self.__page.goto(str(store_url), wait_until="networkidle")
 
     async def __is_logged_in(self) -> bool:
         return await self.__page.locator("//egs-navigation").get_attribute("isloggedin") == "true"
