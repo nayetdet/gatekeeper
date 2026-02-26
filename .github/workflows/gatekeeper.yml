@@ -24,7 +24,7 @@ jobs:
         run: |
           if [[ "${{ github.event.repository.private }}" != "true" ]]; then
             echo "This workflow must be run in a private repository"
-            exit 0
+            exit 1
           fi
 
       - name: Checkout
