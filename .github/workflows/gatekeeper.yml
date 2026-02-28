@@ -12,7 +12,7 @@ env:
 jobs:
   gatekeeper:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 20
     permissions:
       contents: write
     concurrency:
