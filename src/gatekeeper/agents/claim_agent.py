@@ -32,7 +32,7 @@ class ClaimAgent:
             logger.info("Clicking payment confirmation button")
             payment_iframe: FrameLocator = self.__page.frame_locator("//iframe[@class='']")
             payment_button: Locator = payment_iframe.locator("//button[contains(@class, 'payment-btn')]")
-            await PlaywrightUtils.click(payment_button)
+            await PlaywrightUtils.click(payment_button, force=True)
 
             with suppress(Exception):
                 logger.info("Waiting for captcha challenge if present")

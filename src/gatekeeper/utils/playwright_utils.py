@@ -17,7 +17,7 @@ class PlaywrightUtils:
 
     @staticmethod
     @retry(max_attempts=3, wait=5)
-    async def click(locator: Locator) -> None:
+    async def click(locator: Locator, force: bool = False) -> None:
         await locator.wait_for(state="visible")
         await locator.scroll_into_view_if_needed()
-        await locator.click(timeout=5000)
+        await locator.click(force=force, timeout=5000)
