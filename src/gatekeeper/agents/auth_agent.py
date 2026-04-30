@@ -5,7 +5,7 @@ from loguru import logger
 from playwright.async_api import Page
 from yarl import URL
 from gatekeeper.config import config
-from gatekeeper.decorators.retry_decorator import retry
+from gatekeeper.decorators.retry_if_needed_decorator import retry_if_needed
 from gatekeeper.events.auth_events import AuthEvents
 from gatekeeper.factories.auth_url_factory import AuthUrlFactory
 from gatekeeper.factories.store_url_factory import StoreUrlFactory
@@ -15,7 +15,7 @@ class AuthAgent:
     def __init__(self, page: Page) -> None:
         self.__page: Page = page
 
-    @retry(max_attempts=3, wait=5)
+    @retry_if_needed
     async def login_if_needed(self, hcaptcha_challenger: AgentV) -> None:
         logger.info("Ensuring authenticated session with Epic Games")
         await self.__handle_redirection()

@@ -15,7 +15,7 @@ O workflow verifica automaticamente se o repositório é privado.
 
 1. Crie um repositório **PRIVADO** no GitHub.
 2. Copie o arquivo `.github/workflows/gatekeeper.yml` para esse repositório.
-3. Configure as secrets em **Settings → Secrets and variables → Actions**:
+3. Configure as secrets em **Settings -> Secrets and variables -> Actions**:
 
    - `EPIC_GAMES_EMAIL`
    - `EPIC_GAMES_PASSWORD`
@@ -23,8 +23,8 @@ O workflow verifica automaticamente se o repositório é privado.
    - `EPIC_GAMES_COUNTRY`
    - `GEMINI_API_KEY`
 
-4. Descomente o bloco `cron` no workflow para habilitar a execução agendada.
-5. Execute uma primeira vez manualmente em **Actions → Gatekeeper → Run workflow**.
+4. Descomente o bloco `schedule` no workflow para habilitar a execução agendada.
+5. Execute uma primeira vez manualmente em **Actions -> Gatekeeper -> Run workflow**.
 
 Durante a execução, o conteúdo de `data/` é salvo na branch `state`.  
 Não delete essa branch, pois ela mantém o estado da aplicação.
@@ -39,9 +39,17 @@ cp .env.example .env
 
 Edite o `.env` com base no que já está no arquivo e informe suas credenciais.
 
+Se não quiser usar Telegram, defina:
+
+```env
+TELEGRAM_BOT_ENABLED=false
+```
+
 ```sh
-docker compose --env-file .env up -d
+make install
+make run
 ```
 
 ## Importante
+
 Para conseguir logar, desative o 2FA da conta.

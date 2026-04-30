@@ -1,10 +1,11 @@
 from contextlib import asynccontextmanager
-from datetime import datetime
 from typing import AsyncIterator
 from browserforge.fingerprints import Screen
 from camoufox import AsyncCamoufox
-from playwright.async_api import ViewportSize, Page
+from playwright.async_api import Page, ViewportSize
 from gatekeeper.config import config
+from gatekeeper.utils.file_utils import FileUtils
+from gatekeeper.utils.playwright_snapshot_utils import PlaywrightSnapshotUtils
 
 class BrowserContext:
     @staticmethod
@@ -14,20 +15,25 @@ class BrowserContext:
             os=("windows",),
             persistent_context=True,
             user_data_dir=config.BROWSER_PROFILE_PATH,
-            record_video_dir=config.RECORDS_PATH / f"{datetime.now():%Y%m%dT%H%M%S}",
+            record_video_dir=FileUtils.get_directory_path(config.RECORDS_PATH),
             record_video_size=ViewportSize(
-                width=config.SCREEN_WIDTH,
-                height=config.SCREEN_HEIGHT
+                width=config.BROWSER_SCREEN_WIDTH,
+                height=config.BROWSER_SCREEN_HEIGHT
             ),
             screen=Screen(
-                min_width=config.SCREEN_WIDTH,
-                min_height=config.SCREEN_HEIGHT,
-                max_width=config.SCREEN_WIDTH,
-                max_height=config.SCREEN_HEIGHT
+                min_width=config.BROWSER_SCREEN_WIDTH,
+                min_height=config.BROWSER_SCREEN_HEIGHT,
+                max_width=config.BROWSER_SCREEN_WIDTH,
+                max_height=config.BROWSER_SCREEN_HEIGHT
             ),
-            headless=True,
+            slow_mo=500,
+            headless=config.BROWSER_HEADLESS,
             humanize=True,
             disable_coop=True,
             i_know_what_im_doing=True
         ) as browser:
-            yield browser.pages[0] if browser.pages else await browser.new_page()
+            page: Page = browser.pages[0] if browser.pages else await browser.new_page()
+            try: yield page
+            except Exception:
+                await PlaywrightSnapshotUtils.save_snapshot(page)
+                raise

@@ -1,23 +1,46 @@
 services:
   gatekeeper:
-#    build:
-#      context: .
-#      dockerfile: ./docker/uv/Dockerfile
     image: ghcr.io/nayetdet/gatekeeper:latest
-    container_name: gatekeeper
     init: true
-    mem_limit: 4g
-    shm_size: 2g
+    deploy:
+      mode: replicated
+      replicas: 0
+      labels:
+        - swarm.cronjob.enable=true
+        - swarm.cronjob.schedule=${CRON?err}
+        - swarm.cronjob.skip-running=true
+        - swarm.cronjob.registry-auth=true
+        - swarm.cronjob.query-registry=true
+      restart_policy:
+        condition: none
+      resources:
+        limits:
+          memory: 4G
+    volumes:
+      - type: bind
+        source: ./data
+        target: /app/data
+      - type: tmpfs
+        target: /dev/shm
+        tmpfs:
+          size: 2147483648 # ~2G
     environment:
-      CRONTAB: ${CRONTAB}
+      TZ: ${TZ}
       EPIC_GAMES_EMAIL: ${EPIC_GAMES_EMAIL}
       EPIC_GAMES_PASSWORD: ${EPIC_GAMES_PASSWORD}
       EPIC_GAMES_LOCALE: ${EPIC_GAMES_LOCALE}
       EPIC_GAMES_COUNTRY: ${EPIC_GAMES_COUNTRY}
       GEMINI_API_KEY: ${GEMINI_API_KEY}
-    volumes:
-      - gatekeeper_data:/app/data
-    restart: unless-stopped # Set to "no" when no cron schedule is configured
 
-volumes:
-  gatekeeper_data:
+  gatekeeper-swarm-cronjob:
+    image: ghcr.io/crazy-max/swarm-cronjob:latest
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+    volumes:
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+    environment:
+      TZ: ${TZ}

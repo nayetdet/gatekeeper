@@ -2,7 +2,7 @@ import aiohttp
 from contextlib import suppress
 from typing import List, Dict, Any, Optional
 from loguru import logger
-from gatekeeper.decorators.retry_decorator import retry
+from gatekeeper.decorators.retry_if_needed_decorator import retry_if_needed
 from gatekeeper.factories.store_url_factory import StoreUrlFactory
 from gatekeeper.mappers.product_mapper import ProductMapper
 from gatekeeper.models import Product
@@ -11,7 +11,7 @@ from gatekeeper.schemas.product_schema import ProductSchema
 
 class DiscoveryService:
     @staticmethod
-    @retry(max_attempts=3, wait=5)
+    @retry_if_needed
     async def get_free_products() -> List[ProductSchema]:
         products: List[ProductSchema] = []
         logger.info("Fetching free products from Epic Games promotions API")

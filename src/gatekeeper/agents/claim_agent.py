@@ -4,7 +4,7 @@ from hcaptcha_challenger import AgentV
 from loguru import logger
 from playwright.async_api import Page, Locator, FrameLocator
 from yarl import URL
-from gatekeeper.decorators.retry_decorator import retry
+from gatekeeper.decorators.retry_if_needed_decorator import retry_if_needed
 from gatekeeper.events.claim_events import ClaimEvents
 from gatekeeper.utils.playwright_utils import PlaywrightUtils
 
@@ -12,7 +12,7 @@ class ClaimAgent:
     def __init__(self, page: Page) -> None:
         self.__page: Page = page
 
-    @retry(max_attempts=3, wait=5)
+    @retry_if_needed
     async def claim_product(self, hcaptcha_challenger: AgentV, url: URL) -> None:
         logger.info("Starting product claim: {}", url)
         await self.__page.goto(str(url), wait_until="domcontentloaded")

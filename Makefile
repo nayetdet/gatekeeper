@@ -1,11 +1,11 @@
-.PHONY: install run migrations
+.PHONY: install run migrate
 
 install:
 	uv sync --all-groups --all-packages
 
-run: migrations
+run: migrate
 	uv run python -m gatekeeper
 
-migrations:
+migrate:
 	mkdir -p data
 	uv run alembic upgrade head

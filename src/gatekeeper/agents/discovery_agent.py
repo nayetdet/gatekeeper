@@ -1,6 +1,6 @@
 from playwright.async_api import Page, Locator
 from yarl import URL
-from gatekeeper.decorators.retry_decorator import retry
+from gatekeeper.decorators.retry_if_needed_decorator import retry_if_needed
 from gatekeeper.enums.product_path_type import ProductPathType
 from gatekeeper.factories.store_url_factory import StoreUrlFactory
 from gatekeeper.schemas.product_schema import ProductSchema
@@ -13,7 +13,7 @@ class DiscoveryAgent:
         path_type: ProductPathType = await self.__get_product_path_type(product.slug)
         return StoreUrlFactory.get_store_product_url(product.slug, path_type=path_type)
 
-    @retry(max_attempts=3, wait=5)
+    @retry_if_needed
     async def __get_product_path_type(self, slug: str) -> ProductPathType:
         for ptype in ProductPathType:
             await self.__page.goto(str(StoreUrlFactory.get_store_product_url(slug, ptype)), wait_until="domcontentloaded")
