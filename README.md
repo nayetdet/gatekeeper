@@ -45,6 +45,14 @@ Se não quiser usar Telegram, defina:
 TELEGRAM_BOT_ENABLED=false
 ```
 
+Para rodar localmente pelo Docker Compose, use o script de deploy:
+
+```sh
+./scripts/deploy.sh
+```
+
+Para rodar direto pelo Python:
+
 ```sh
 make install
 make run
