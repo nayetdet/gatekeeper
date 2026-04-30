@@ -26,11 +26,15 @@ services:
           size: 2147483648 # ~2G
     environment:
       TZ: ${TZ}
+      BROWSER_HEADLESS: ${BROWSER_HEADLESS}
       EPIC_GAMES_EMAIL: ${EPIC_GAMES_EMAIL}
       EPIC_GAMES_PASSWORD: ${EPIC_GAMES_PASSWORD}
       EPIC_GAMES_LOCALE: ${EPIC_GAMES_LOCALE}
       EPIC_GAMES_COUNTRY: ${EPIC_GAMES_COUNTRY}
       GEMINI_API_KEY: ${GEMINI_API_KEY}
+      TELEGRAM_BOT_ENABLED: ${TELEGRAM_BOT_ENABLED}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      TELEGRAM_BOT_CHAT_ID: ${TELEGRAM_BOT_CHAT_ID}
 
   gatekeeper-swarm-cronjob:
     image: ghcr.io/crazy-max/swarm-cronjob:latest
