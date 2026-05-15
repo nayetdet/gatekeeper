@@ -1,0 +1,41 @@
+{
+  "name": "workspace",
+
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+
+  "mounts": [
+    "source=${localEnv:HOME}/.codex,target=/home/vscode/.codex,type=bind"
+  ],
+
+  "runArgs": [
+    "--security-opt=label=disable"
+  ],
+
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "24"
+    },
+
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.14"
+    },
+
+    "ghcr.io/va-h/devcontainers-features/uv:1": {},
+
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "charliermarsh.ruff",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode"
+      ]
+    }
+  }
+}
