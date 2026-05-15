@@ -21,13 +21,13 @@ class TelegramService:
             📅 Data/Hora: {FileUtils.get_timestamp()}
             📊 Status: {"✅ Sucesso" if success else "❌ Erro"}
 
-            {textwrap.dedent(
-                f'''
-                🔎 Total: {summary.total}
-                ❌ Jogos não resgatados: {summary.failure}
-                ✅ Jogos resgatados com sucesso: {summary.success}
-                '''
-            ).strip() if not summary.was_skipped else ""}
+            {
+                "\n".join([
+                    f"🔎 Total: {summary.total}",
+                    f"❌ Jogos não resgatados: {summary.failure}",
+                    f"✅ Jogos resgatados com sucesso: {summary.success}",
+                ]) if not summary.was_skipped else ""
+            }
             """
         ).strip()
 
