@@ -31,7 +31,7 @@ class ClaimAgent:
 
             logger.info("Clicking payment confirmation button")
             payment_iframe: FrameLocator = self.__page.frame_locator("//iframe[@class='']")
-            payment_button: Locator = payment_iframe.locator("//button[contains(@class, 'payment-btn')]")
+            payment_button: Locator = payment_iframe.locator("//button[./span]")
             await PlaywrightUtils.click(payment_button, force=True)
 
             with suppress(Exception):

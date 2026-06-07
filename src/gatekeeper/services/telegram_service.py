@@ -1,4 +1,3 @@
-import textwrap
 from loguru import logger
 from telebot import TeleBot
 from gatekeeper.config import config
