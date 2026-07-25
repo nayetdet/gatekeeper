@@ -2,7 +2,7 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: {{ .Release.Name }}-gatekeeper
+  name: {{ .Release.Name }}
 spec:
   schedule: {{ .Values.schedule | quote }}
   {{- with .Values.timeZone }}
