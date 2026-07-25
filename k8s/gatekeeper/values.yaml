@@ -24,9 +24,12 @@ persistence:
   storageClass: ""
 
 resources:
-  memoryRequest: 1Gi
-  memoryLimit: 4Gi
-  shmSizeLimit: 2Gi
+  requests:
+    memory: 1Gi
+  limits:
+    memory: 4Gi
+
+shmSizeLimit: 2Gi
 
 sftpgo:
   sftpd:
@@ -40,15 +43,10 @@ sftpgo:
   volumes:
     - name: gatekeeper-data
       persistentVolumeClaim:
-        claimName: gatekeeper-gatekeeper-data
+        claimName: '{{ .Release.Name }}-gatekeeper-data'
   volumeMounts:
     - name: gatekeeper-data
       mountPath: /srv/sftpgo/data
   ui:
     ingress:
-      enabled: true
-      hosts:
-        - host: ""
-          paths:
-            - path: /
-              pathType: Prefix
+      enabled: false

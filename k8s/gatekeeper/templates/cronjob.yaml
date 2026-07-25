@@ -65,10 +65,7 @@ spec:
                       key: TELEGRAM_BOT_CHAT_ID
                 {{- end }}
               resources:
-                requests:
-                  memory: {{ .Values.resources.memoryRequest }}
-                limits:
-                  memory: {{ .Values.resources.memoryLimit }}
+                {{- toYaml .Values.resources | nindent 16 }}
               volumeMounts:
                 - name: data
                   mountPath: /app/data
@@ -81,4 +78,4 @@ spec:
             - name: shm
               emptyDir:
                 medium: Memory
-                sizeLimit: {{ .Values.resources.shmSizeLimit }}
+                sizeLimit: {{ .Values.shmSizeLimit }}
