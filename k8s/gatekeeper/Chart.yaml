@@ -4,3 +4,7 @@ description: Gatekeeper is an automated service that claims free games from the 
 type: application
 version: 0.1.0
 appVersion: "1.2.0"
+dependencies:
+  - name: sftpgo
+    version: "*"
+    repository: oci://ghcr.io/sftpgo/helm-charts

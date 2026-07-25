@@ -24,9 +24,31 @@ persistence:
   storageClass: ""
 
 resources:
-  requests:
-    memory: 1Gi
-  limits:
-    memory: 4Gi
+  memoryRequest: 1Gi
+  memoryLimit: 4Gi
+  shmSizeLimit: 2Gi
 
-shmSizeLimit: 2Gi
+sftpgo:
+  sftpd:
+    enabled: false
+  persistence:
+    enabled: true
+    pvc:
+      resources:
+        requests:
+          storage: 256Mi
+  volumes:
+    - name: gatekeeper-data
+      persistentVolumeClaim:
+        claimName: gatekeeper-gatekeeper-data
+  volumeMounts:
+    - name: gatekeeper-data
+      mountPath: /srv/sftpgo/data
+  ui:
+    ingress:
+      enabled: true
+      hosts:
+        - host: ""
+          paths:
+            - path: /
+              pathType: Prefix
