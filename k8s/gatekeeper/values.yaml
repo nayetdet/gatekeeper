@@ -33,6 +33,15 @@ shmSizeLimit: 2Gi
 
 filebrowser:
   enabled: false
+  auth:
+    enabled: true
+  workload:
+    main:
+      podSpec:
+        containers:
+          main:
+            env:
+              FB_NOAUTH: '{{ ternary "false" "noauth" .Values.auth.enabled }}'
   persistence:
     config:
       storageClass: *storageClass

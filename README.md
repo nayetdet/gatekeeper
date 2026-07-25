@@ -22,7 +22,7 @@ The contents of `data/` are stored in the `state` branch between executions. Do 
 
 ## Helm
 
-The Helm chart is located at [`k8s/gatekeeper`](k8s/gatekeeper). It runs Gatekeeper as a Kubernetes `CronJob`, stores application data in a PVC, and mounts `/dev/shm` as an in-memory volume for the browser. A read-only File Browser is also deployed against the same PVC so generated files can be viewed and downloaded.
+The Helm chart is located at [`k8s/gatekeeper`](k8s/gatekeeper). It runs Gatekeeper as a Kubernetes `CronJob`, stores application data in a PVC, and mounts `/dev/shm` as an in-memory volume for the browser. It optionally includes File Browser as a read-only web interface for viewing and downloading generated files.
 
 By default, the chart references a Kubernetes Secret that already exists in the namespace. The chart does not create or modify Secrets.
 
@@ -70,10 +70,29 @@ The chart is also published as an OCI artifact in GHCR by [`.github/workflows/he
 helm registry login ghcr.io
 helm upgrade --install gatekeeper \
   oci://ghcr.io/nayetdet/charts/gatekeeper \
-  --version 0.1.0
+  --version 0.1.2
 ```
 
-The schedule, timezone, image, persistence size, and resource settings can be customized with a values file or `--set`.
+The schedule, timezone, image, persistence size, resource settings, and File Browser options can be customized with a values file or `--set`.
+
+File Browser is disabled by default. To enable it with authentication and an Ingress:
+
+```yaml
+filebrowser:
+  enabled: true
+  auth:
+    enabled: true
+  ingress:
+    main:
+      enabled: true
+      hosts:
+        - host: files.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+```
+
+It mounts the existing `gatekeeper` PVC at `/data` in read-only mode. To disable authentication for a private network, set `filebrowser.auth.enabled` to `false`. The File Browser dependency is managed through Helm and uses the latest matching chart version (`version: "*"`).
 
 To run a job immediately instead of waiting for the schedule:
 
@@ -81,7 +100,7 @@ To run a job immediately instead of waiting for the schedule:
 kubectl create job --from=cronjob/gatekeeper-gatekeeper gatekeeper-manual-$(date +%s)
 ```
 
-The Ingress is disabled until a host is configured in `k8s/gatekeeper/values.yaml`. Set `filebrowser.ingress.main.enabled` to `true` and fill in the host before deploying.
+The File Browser Ingress is disabled by default until a host is configured. Authentication defaults to enabled and can be disabled with `--set filebrowser.auth.enabled=false`.
 
 To access the generated files locally without Ingress:
 
