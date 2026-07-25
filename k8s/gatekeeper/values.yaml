@@ -41,7 +41,7 @@ filebrowser:
         containers:
           main:
             env:
-              FB_NOAUTH: '{{ ternary "false" "noauth" .Values.auth.enabled }}'
+              FB_NOAUTH: '{{ ternary "false" "true" .Values.auth.enabled }}'
   persistence:
     config:
       storageClass: *storageClass
