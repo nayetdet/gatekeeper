@@ -4,9 +4,7 @@ image:
 
 schedule: "0 15 * * *"
 timeZone: America/Fortaleza
-
 env:
-  TZ: America/Fortaleza
   EPIC_GAMES_LOCALE: pt-BR
   EPIC_GAMES_COUNTRY: BR
   TELEGRAM_BOT_ENABLED: "true"

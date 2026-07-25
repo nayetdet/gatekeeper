@@ -28,6 +28,8 @@ spec:
               env:
                 - name: BROWSER_HEADLESS
                   value: "true"
+                - name: TZ
+                  value: {{ .Values.timeZone | quote }}
                 {{- range $name, $value := .Values.env }}
                 {{- if ne $name "BROWSER_HEADLESS" }}
                 - name: {{ $name }}
