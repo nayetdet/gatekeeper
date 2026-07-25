@@ -44,7 +44,7 @@ sftpgo:
   volumes:
     - name: gatekeeper-data
       persistentVolumeClaim:
-        claimName: '{{ .Release.Name }}-gatekeeper-data'
+        claimName: gatekeeper-gatekeeper-data
   volumeMounts:
     - name: gatekeeper-data
       mountPath: /srv/sftpgo/data
