@@ -24,15 +24,30 @@ The contents of `data/` are stored in the `state` branch between executions. Do 
 
 The Helm chart is located at [`k8s/gatekeeper`](k8s/gatekeeper). It runs Gatekeeper as a Kubernetes `CronJob`, stores application data in a PVC, and mounts `/dev/shm` as an in-memory volume for the browser.
 
-The chart uses [External Secrets Operator](https://external-secrets.io/) to create the Kubernetes Secret consumed by the application. A `ClusterSecretStore` and the External Secrets Operator CRDs must already be installed in the cluster.
+By default, the chart references a Kubernetes Secret that already exists in the namespace. The chart does not create or modify Secrets.
 
 Configure the external secret reference in `k8s/gatekeeper/values.yaml`:
 
 ```yaml
 externalSecret:
-  name: gatekeeper
+  enabled: true
   storeName: vault
   remoteKey: gatekeeper
+```
+
+When using `ExternalSecret`, also disable the regular Secret reference:
+
+```yaml
+secret:
+  enabled: false
+```
+
+The name of the Kubernetes Secret consumed by the application is configured separately. To use a regular Secret that already exists in the namespace, set `secret.enabled` to `true`. The chart will only reference it; it will not create or modify it:
+
+```yaml
+secret:
+  name: gatekeeper
+  enabled: true
 ```
 
 The remote secret must contain these keys:

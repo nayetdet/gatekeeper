@@ -1,3 +1,4 @@
+{{- include "gatekeeper.validateSecretsConfig" . }}
 apiVersion: batch/v1
 kind: CronJob
 metadata:
@@ -39,28 +40,28 @@ spec:
                 - name: EPIC_GAMES_EMAIL
                   valueFrom:
                     secretKeyRef:
-                      name: {{ required "externalSecret.name is required" .Values.externalSecret.name | quote }}
+                      name: {{ required "secret.name is required" .Values.secret.name | quote }}
                       key: EPIC_GAMES_EMAIL
                 - name: EPIC_GAMES_PASSWORD
                   valueFrom:
                     secretKeyRef:
-                      name: {{ required "externalSecret.name is required" .Values.externalSecret.name | quote }}
+                      name: {{ required "secret.name is required" .Values.secret.name | quote }}
                       key: EPIC_GAMES_PASSWORD
                 - name: GEMINI_API_KEY
                   valueFrom:
                     secretKeyRef:
-                      name: {{ required "externalSecret.name is required" .Values.externalSecret.name | quote }}
+                      name: {{ required "secret.name is required" .Values.secret.name | quote }}
                       key: GEMINI_API_KEY
                 {{- if eq (toString .Values.env.TELEGRAM_BOT_ENABLED) "true" }}
                 - name: TELEGRAM_BOT_TOKEN
                   valueFrom:
                     secretKeyRef:
-                      name: {{ required "externalSecret.name is required" .Values.externalSecret.name | quote }}
+                      name: {{ required "secret.name is required" .Values.secret.name | quote }}
                       key: TELEGRAM_BOT_TOKEN
                 - name: TELEGRAM_BOT_CHAT_ID
                   valueFrom:
                     secretKeyRef:
-                      name: {{ .Values.externalSecret.name | quote }}
+                      name: {{ .Values.secret.name | quote }}
                       key: TELEGRAM_BOT_CHAT_ID
                 {{- end }}
               resources:

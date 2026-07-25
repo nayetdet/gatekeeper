@@ -9,9 +9,13 @@ env:
   EPIC_GAMES_COUNTRY: BR
   TELEGRAM_BOT_ENABLED: "true"
 
-externalSecret:
+secret:
+  enabled: true
   name: gatekeeper
-  storeName: vault
+
+externalSecret:
+  enabled: false
+  storeName: ""
   refreshInterval: 1h
   remoteKey: gatekeeper
 
