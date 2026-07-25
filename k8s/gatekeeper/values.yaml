@@ -21,7 +21,7 @@ externalSecret:
 
 persistence:
   size: 10Gi
-  storageClass: ""
+  storageClass: &storageClass local-path
 
 resources:
   requests:
@@ -37,6 +37,7 @@ sftpgo:
   persistence:
     enabled: true
     pvc:
+      storageClassName: *storageClass
       resources:
         requests:
           storage: 256Mi
