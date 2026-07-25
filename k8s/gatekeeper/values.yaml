@@ -44,7 +44,7 @@ sftpgo:
   volumes:
     - name: gatekeeper-data
       persistentVolumeClaim:
-        claimName: gatekeeper-gatekeeper-data
+        claimName: gatekeeper
   volumeMounts:
     - name: gatekeeper-data
       mountPath: /srv/sftpgo/data
