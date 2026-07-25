@@ -1,0 +1,30 @@
+image:
+  repository: ghcr.io/nayetdet/gatekeeper
+  tag: latest
+
+schedule: "0 15 * * *"
+timeZone: America/Fortaleza
+
+env:
+  TZ: America/Fortaleza
+  EPIC_GAMES_LOCALE: pt-BR
+  EPIC_GAMES_COUNTRY: BR
+  TELEGRAM_BOT_ENABLED: "true"
+
+externalSecret:
+  name: gatekeeper
+  storeName: vault
+  refreshInterval: 1h
+  remoteKey: gatekeeper
+
+persistence:
+  size: 10Gi
+  storageClass: ""
+
+resources:
+  requests:
+    memory: 1Gi
+  limits:
+    memory: 4Gi
+
+shmSizeLimit: 2Gi

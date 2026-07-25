@@ -1,0 +1,38 @@
+name: Helm
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "k8s/gatekeeper/**"
+      - ".github/workflows/helm.yml"
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+
+      - name: Lint chart
+        run: helm lint k8s/gatekeeper
+
+      - name: Log in to GHCR
+        env:
+          CR_PAT: ${{ secrets.GITHUB_TOKEN }}
+        run: echo "$CR_PAT" | helm registry login ghcr.io --username "${{ github.actor }}" --password-stdin
+
+      - name: Package and publish chart
+        working-directory: k8s/gatekeeper
+        run: |
+          package_dir="$(mktemp -d)"
+          helm package . --destination "$package_dir"
+          helm push "$package_dir"/*.tgz "oci://ghcr.io/${{ github.repository_owner }}/charts"

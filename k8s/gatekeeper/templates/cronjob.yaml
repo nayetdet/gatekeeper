@@ -1,0 +1,78 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ .Release.Name }}-gatekeeper
+spec:
+  schedule: {{ .Values.schedule | quote }}
+  {{- with .Values.timeZone }}
+  timeZone: {{ . | quote }}
+  {{- end }}
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 900
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      activeDeadlineSeconds: 3600
+      template:
+        metadata:
+          labels:
+            app: gatekeeper
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: gatekeeper
+              image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+              imagePullPolicy: Always
+              env:
+                - name: BROWSER_HEADLESS
+                  value: "true"
+                {{- range $name, $value := .Values.env }}
+                {{- if ne $name "BROWSER_HEADLESS" }}
+                - name: {{ $name }}
+                  value: {{ $value | quote }}
+                {{- end }}
+                {{- end }}
+                - name: EPIC_GAMES_EMAIL
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ required "externalSecret.name is required" .Values.externalSecret.name | quote }}
+                      key: EPIC_GAMES_EMAIL
+                - name: EPIC_GAMES_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ required "externalSecret.name is required" .Values.externalSecret.name | quote }}
+                      key: EPIC_GAMES_PASSWORD
+                - name: GEMINI_API_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ required "externalSecret.name is required" .Values.externalSecret.name | quote }}
+                      key: GEMINI_API_KEY
+                {{- if eq (toString .Values.env.TELEGRAM_BOT_ENABLED) "true" }}
+                - name: TELEGRAM_BOT_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ required "externalSecret.name is required" .Values.externalSecret.name | quote }}
+                      key: TELEGRAM_BOT_TOKEN
+                - name: TELEGRAM_BOT_CHAT_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ .Values.externalSecret.name | quote }}
+                      key: TELEGRAM_BOT_CHAT_ID
+                {{- end }}
+              resources:
+                {{- toYaml .Values.resources | nindent 16 }}
+              volumeMounts:
+                - name: data
+                  mountPath: /app/data
+                - name: shm
+                  mountPath: /dev/shm
+          volumes:
+            - name: data
+              persistentVolumeClaim:
+                claimName: {{ .Release.Name }}-gatekeeper-data
+            - name: shm
+              emptyDir:
+                medium: Memory
+                sizeLimit: {{ .Values.shmSizeLimit }}
