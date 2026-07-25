@@ -22,7 +22,7 @@ The contents of `data/` are stored in the `state` branch between executions. Do 
 
 ## Helm
 
-The Helm chart is located at [`k8s/gatekeeper`](k8s/gatekeeper). It runs Gatekeeper as a Kubernetes `CronJob`, stores application data in a PVC, and mounts `/dev/shm` as an in-memory volume for the browser.
+The Helm chart is located at [`k8s/gatekeeper`](k8s/gatekeeper). It runs Gatekeeper as a Kubernetes `CronJob`, stores application data in a PVC, and mounts `/dev/shm` as an in-memory volume for the browser. A read-only File Browser is also deployed against the same PVC so generated files can be viewed and downloaded.
 
 By default, the chart references a Kubernetes Secret that already exists in the namespace. The chart does not create or modify Secrets.
 
@@ -80,6 +80,16 @@ To run a job immediately instead of waiting for the schedule:
 ```sh
 kubectl create job --from=cronjob/gatekeeper-gatekeeper gatekeeper-manual-$(date +%s)
 ```
+
+The Ingress is disabled until a host is configured in `k8s/gatekeeper/values.yaml`. Set `filebrowser.ingress.main.enabled` to `true` and fill in the host before deploying.
+
+To access the generated files locally without Ingress:
+
+```sh
+kubectl port-forward service/gatekeeper-filebrowser 10187:10187
+```
+
+Then open <http://localhost:10187>. The File Browser deployment mounts the application PVC read-only at `/data`, so the generated recordings are available under `/records` without exposing write access.
 
 ## Local execution
 

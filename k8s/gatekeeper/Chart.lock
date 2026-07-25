@@ -1,6 +1,6 @@
 dependencies:
-- name: sftpgo
-  repository: oci://ghcr.io/sftpgo/helm-charts
-  version: 0.47.0
-digest: sha256:7e9fd378275dc2f708f2ec4941ccd9a3c73dc0ed7958dd6deea6f68d1a4b62ac
-generated: "2026-07-25T09:27:52.472500738-03:00"
+- name: filebrowser
+  repository: oci://oci.trueforge.org/truecharts
+  version: 13.7.2
+digest: sha256:91b4699c3224b5b069aa1bcd15c422bda2838b1af316217c264a60f869a49d67
+generated: "2026-07-25T12:09:44.436353286-03:00"

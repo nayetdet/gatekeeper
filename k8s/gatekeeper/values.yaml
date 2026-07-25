@@ -31,23 +31,22 @@ resources:
 
 shmSizeLimit: 2Gi
 
-sftpgo:
-  sftpd:
-    enabled: false
+filebrowser:
+  enabled: false
   persistence:
-    enabled: true
-    pvc:
-      storageClassName: *storageClass
-      resources:
-        requests:
-          storage: 256Mi
-  volumes:
-    - name: gatekeeper-data
-      persistentVolumeClaim:
-        claimName: gatekeeper
-  volumeMounts:
-    - name: gatekeeper-data
-      mountPath: /srv/sftpgo/data
-  ui:
-    ingress:
+    config:
+      storageClass: *storageClass
+      size: 256Mi
+    database:
+      storageClass: *storageClass
+      size: 256Mi
+    data:
+      existingClaim: gatekeeper
+      readOnly: true
+  ingress:
+    main:
       enabled: false
+      hosts:
+        - host: ""
+          paths:
+            - path: /

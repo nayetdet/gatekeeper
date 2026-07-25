@@ -2,9 +2,10 @@ apiVersion: v2
 name: gatekeeper
 description: Gatekeeper is an automated service that claims free games from the Epic Games Store, keeping your library up to date without requiring a manual check every week.
 type: application
-version: 0.1.1
+version: 0.1.2
 appVersion: "1.2.0"
 dependencies:
-  - name: sftpgo
+  - name: filebrowser
     version: "*"
-    repository: oci://ghcr.io/sftpgo/helm-charts
+    repository: oci://oci.trueforge.org/truecharts
+    condition: filebrowser.enabled
